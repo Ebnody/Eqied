@@ -239,18 +239,20 @@ export function MiniAppClient() {
     }
     setSaving(true);
     setMessage(null);
+    const payload = {
+      initData,
+      text: text || undefined,
+      type,
+      amountEtb,
+      categoryKey,
+      counterparty: result?.counterparty ?? undefined,
+    };
+    console.log("[miniapp-save] payload:", payload);
     try {
       const res = await fetch("/api/miniapp/save", {
         method: "POST",
         headers: getAuthHeaders(),
-        body: JSON.stringify({
-          initData,
-          text: text || undefined,
-          type,
-          amountEtb,
-          categoryKey,
-          counterparty: result?.counterparty ?? undefined,
-        }),
+        body: JSON.stringify(payload),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -260,6 +262,8 @@ export function MiniAppClient() {
           setMessage({ kind: "err", text: t("miniapp.notLinked") });
         } else if (data.error === "not_verified") {
           setMessage({ kind: "err", text: t("miniapp.notVerified") });
+        } else if (data.error === "validation" && data.issues?.length) {
+          setMessage({ kind: "err", text: `Validation: ${data.issues.join(", ")}` });
         } else {
           setMessage({ kind: "err", text: data.error || t("common.failedToSave") });
         }

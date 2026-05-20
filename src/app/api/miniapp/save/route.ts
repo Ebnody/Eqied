@@ -20,7 +20,9 @@ export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => null);
   const parsed = schema.safeParse(body);
   if (!parsed.success) {
-    return NextResponse.json({ error: "validation" }, { status: 400 });
+    const issues = parsed.error.issues.map((i) => `${i.path.join(".")}: ${i.message}`);
+    console.log("[miniapp-save] validation failed:", issues, "body:", JSON.stringify(body));
+    return NextResponse.json({ error: "validation", issues }, { status: 400 });
   }
 
   const fallbackToken = req.headers.get("x-ethiobudget-token");
