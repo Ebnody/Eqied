@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { resolveMiniAppUser } from "@/lib/telegram/webapp-auth";
+import { resolveMiniAppUserWithFallback } from "@/lib/telegram/webapp-auth";
 import { parseTransactionSms } from "@/lib/telegram/parsers";
 import { prisma } from "@/lib/prisma";
 import { toSantim } from "@/lib/utils";
 
 const schema = z.object({
-  initData: z.string().min(10),
+  initData: z.string().optional(),
   text: z.string().max(2000).optional(),
   // optional manual overrides if parser gets it wrong
   type: z.enum(["income", "expense"]).optional(),
@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "validation" }, { status: 400 });
   }
 
-  const auth = await resolveMiniAppUser(parsed.data.initData);
+  const auth = await resolveMiniAppUserWithFallback(parsed.data.initData);
   if (!auth.ok) {
     return NextResponse.json({ error: auth.reason }, { status: 401 });
   }

@@ -153,9 +153,14 @@ export function MiniAppClient() {
         `wait ${elapsed}ms · hash=${window.location.hash.length} · tg=${!!window.Telegram?.WebApp}`
       );
       if (elapsed >= maxWait) {
-        // No hash and no WebApp object → not opened from Telegram.
-        if (window.Telegram?.WebApp) setTgState("no-init-data");
-        else setTgState("outside");
+        // Telegram WebApp exists but no initData → still show the form.
+        // We fall back to cookie-based session auth on the server.
+        if (window.Telegram?.WebApp) {
+          setTgState("ready");
+          setDebug("webapp-no-init");
+        } else {
+          setTgState("outside");
+        }
         return;
       }
       elapsed += interval;
@@ -175,7 +180,6 @@ export function MiniAppClient() {
   }, [cats, categoryKey]);
 
   async function onParse() {
-    if (!initData) return;
     setParsing(true);
     setMessage(null);
     try {
@@ -200,7 +204,6 @@ export function MiniAppClient() {
   }
 
   async function onSave() {
-    if (!initData) return;
     if (!categoryKey) {
       setMessage({ kind: "err", text: t("miniapp.pickCategory") });
       return;
@@ -253,8 +256,8 @@ export function MiniAppClient() {
   }
 
   const canSave = useMemo(
-    () => !!initData && !!amount && !!categoryKey && !saving,
-    [initData, amount, categoryKey, saving]
+    () => !!amount && !!categoryKey && !saving,
+    [amount, categoryKey, saving]
   );
 
   if (tgState === "loading") {
