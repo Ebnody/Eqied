@@ -49,6 +49,21 @@ function inlineKeyboard(rows: { text: string; url?: string; callback_data?: stri
   return { inline_keyboard: rows };
 }
 
+// Reply keyboard builders (persistent bottom buttons)
+function webAppButton(text: string, url: string) {
+  return { text, web_app: { url } };
+}
+function textButton(text: string) {
+  return { text };
+}
+function replyKeyboard(rows: { text: string; web_app?: { url: string } }[][], opts?: { resize?: boolean; oneTime?: boolean }) {
+  return {
+    keyboard: rows,
+    resize_keyboard: opts?.resize ?? true,
+    one_time_keyboard: opts?.oneTime ?? false,
+  };
+}
+
 async function handleStart(message: TgMessage) {
   const chatId = String(message.chat.id);
   const text = message.text ?? "";
@@ -68,15 +83,16 @@ async function handleStart(message: TgMessage) {
       const t = tForLocale(locale);
       const dashUrl = buildDashboardUrl();
       const addUrl = buildAppUrl("/income");
+      const txUrl = buildTransactionsUrl();
       if (existing.user.isVerified) {
-        const keyboard = inlineKeyboard([
-          dashUrl ? [urlButton("📊 Dashboard", dashUrl)] : [],
-          addUrl ? [urlButton("➕ Add Transaction", addUrl)] : [],
-          [callbackButton("❓ Help", "btn:help"), callbackButton("🌐 Language", "btn:language")],
+        const keyboard = replyKeyboard([
+          dashUrl && addUrl ? [webAppButton("📊 Dashboard", dashUrl), webAppButton("➕ Add", addUrl)] : [],
+          txUrl ? [webAppButton("📝 Transactions", txUrl)] : [],
+          [textButton("❓ Help"), textButton("🌐 Language")],
         ].filter((r) => r.length > 0));
         await sendTelegramMessage(
           chatId,
-          `${t("bot.welcomeBack", { name: existing.user.fullName ?? "" })}\n\nWhat would you like to do?`,
+          `${t("bot.welcomeBack", { name: existing.user.fullName ?? "" })}`,
           { reply_markup: keyboard }
         );
       } else {
@@ -145,14 +161,15 @@ async function handleStart(message: TgMessage) {
   if (user.isVerified) {
     const dashUrl = buildDashboardUrl();
     const addUrl = buildAppUrl("/income");
-    const keyboard = inlineKeyboard([
-      dashUrl ? [urlButton("📊 Dashboard", dashUrl)] : [],
-      addUrl ? [urlButton("➕ Add Transaction", addUrl)] : [],
-      [callbackButton("❓ Help", "btn:help"), callbackButton("🌐 Language", "btn:language")],
+    const txUrl = buildTransactionsUrl();
+    const keyboard = replyKeyboard([
+      dashUrl && addUrl ? [webAppButton("📊 Dashboard", dashUrl), webAppButton("➕ Add", addUrl)] : [],
+      txUrl ? [webAppButton("📝 Transactions", txUrl)] : [],
+      [textButton("❓ Help"), textButton("🌐 Language")],
     ].filter((r) => r.length > 0));
     await sendTelegramMessage(
       chatId,
-      `${t("bot.linkedVerified")}\n\nWhat would you like to do?`,
+      `${t("bot.linkedVerified")}`,
       { reply_markup: keyboard }
     );
   } else {
@@ -367,6 +384,26 @@ export async function handleTelegramUpdate(update: TgUpdate) {
     if (text.startsWith("/help")) {
       const chatId = String(update.message.chat.id);
       await handleHelpMessage(chatId);
+      return;
+    }
+
+    if (text === "❓ Help" || text === "Help") {
+      const chatId = String(update.message.chat.id);
+      await handleHelpMessage(chatId);
+      return;
+    }
+
+    if (text === "🌐 Language" || text === "Language") {
+      const chatId = String(update.message.chat.id);
+      const keyboard = inlineKeyboard([
+        [callbackButton("English", "lang:en"), callbackButton("Amharic", "lang:am")],
+        [callbackButton("Oromo", "lang:om"), callbackButton("Tigrigna", "lang:ti")],
+      ]);
+      await sendTelegramMessage(
+        chatId,
+        "🌐 Choose your preferred language:",
+        { reply_markup: keyboard }
+      );
       return;
     }
 
