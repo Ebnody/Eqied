@@ -55,12 +55,17 @@ async function handleStart(message: TgMessage) {
         ? existing.user.preferredLocale
         : DEFAULT_LOCALE;
       const t = tForLocale(locale);
-      await sendTelegramMessage(
-        chatId,
-        existing.user.isVerified
-          ? `${t("bot.welcomeBack", { name: existing.user.fullName ?? "" })}\n\nUse the EthioBudget website for all features.`
-          : t("bot.linkedUnverified")
-      );
+      const dashUrl = buildDashboardUrl();
+      if (existing.user.isVerified) {
+        const lines = [
+          `${t("bot.welcomeBack", { name: existing.user.fullName ?? "" })}`,
+          "",
+          dashUrl ? `Open your dashboard: ${dashUrl}` : "Use the EthioBudget website for all features.",
+        ];
+        await sendTelegramMessage(chatId, lines.join("\n"));
+      } else {
+        await sendTelegramMessage(chatId, t("bot.linkedUnverified"));
+      }
       return;
     }
     const t = tForLocale(DEFAULT_LOCALE);
@@ -128,21 +133,33 @@ async function handleStart(message: TgMessage) {
 }
 
 // Build a deep link to the transactions page so the user can categorize on the web.
-function buildTransactionsUrl(): string | null {
+function buildAppUrl(path: string = ""): string | null {
   const base = process.env.APP_URL?.replace(/\/$/, "");
-  if (!base) return null;
-  return `${base}/transactions`;
+  if (!base) {
+    console.error("[telegram] APP_URL is not set — cannot build app links");
+    return null;
+  }
+  return path ? `${base}${path}` : base;
+}
+function buildTransactionsUrl(): string | null {
+  return buildAppUrl("/transactions");
+}
+function buildDashboardUrl(): string | null {
+  return buildAppUrl("/dashboard");
 }
 
 async function handleTransactionSms(message: TgMessage) {
   const chatId = String(message.chat.id);
   const text = message.text ?? "";
 
+  console.log("[telegram-sms] received text from chat", chatId, "length:", text.length);
+
   const link = await prisma.telegramLink.findUnique({
     where: { chatId },
     include: { user: true },
   });
   if (!link) {
+    console.log("[telegram-sms] no linked user for chat", chatId);
     await sendTelegramMessage(
       chatId,
       "👋 Your Telegram account isn't linked yet. Please sign up at the website first."
@@ -152,6 +169,7 @@ async function handleTransactionSms(message: TgMessage) {
   const user = link.user;
 
   const parsed = parseTransactionSms(text);
+  console.log("[telegram-sms] parsed:", JSON.stringify(parsed));
 
   // Always record the raw SMS for debugging / reprocessing.
   const sms = await prisma.forwardedSms.create({
@@ -166,6 +184,7 @@ async function handleTransactionSms(message: TgMessage) {
   });
 
   if (!parsed.ok || !parsed.amountSantim || !parsed.type) {
+    console.log("[telegram-sms] parse failed or incomplete:", { ok: parsed.ok, amountSantim: parsed.amountSantim, type: parsed.type });
     await sendTelegramMessage(
       chatId,
       `🤔 I couldn't recognize this as a transaction.\n\nYou can add it manually in the EthioBudget app.\n\n_Provider detected:_ ${parsed.provider}`,
@@ -192,23 +211,30 @@ async function handleTransactionSms(message: TgMessage) {
     }
   }
 
-  await prisma.transaction.create({
-    data: {
-      userId: user.id,
-      type: parsed.type,
-      amount: parsed.amountSantim,
-      status: "uncategorized",
-      source: "telegram",
-      paymentMethod: parsed.provider === "telebirr" ? "telebirr" : null,
-      provider: parsed.provider,
-      counterparty: parsed.counterparty ?? null,
-      counterpartyPhone: parsed.counterpartyPhone ?? null,
-      reference: parsed.reference ?? null,
-      balanceAfter: parsed.balanceAfterSantim ?? null,
-      occurredAt: parsed.occurredAt ?? new Date(),
-      forwardedSmsId: sms.id,
-    },
-  });
+  try {
+    await prisma.transaction.create({
+      data: {
+        userId: user.id,
+        type: parsed.type,
+        amount: parsed.amountSantim,
+        status: "uncategorized",
+        source: "telegram",
+        paymentMethod: parsed.provider === "telebirr" ? "telebirr" : null,
+        provider: parsed.provider,
+        counterparty: parsed.counterparty ?? null,
+        counterpartyPhone: parsed.counterpartyPhone ?? null,
+        reference: parsed.reference ?? null,
+        balanceAfter: parsed.balanceAfterSantim ?? null,
+        occurredAt: parsed.occurredAt ?? new Date(),
+        forwardedSmsId: sms.id,
+      },
+    });
+    console.log("[telegram-sms] transaction created for user", user.id);
+  } catch (err) {
+    console.error("[telegram-sms] failed to create transaction:", err);
+    await sendTelegramMessage(chatId, "❌ I recognized this SMS but couldn't save the transaction. Please try forwarding it again.");
+    return;
+  }
 
   const txUrl = buildTransactionsUrl();
   const directionEmoji = parsed.type === "income" ? "📥" : "📤";
