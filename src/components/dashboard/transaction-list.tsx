@@ -13,8 +13,9 @@ interface Txn {
   status: string;
   source: string;
   counterparty: string | null;
-  occurredAt: Date | string;
+  provider: string | null;
   reference: string | null;
+  occurredAt: Date | string;
 }
 
 export function TransactionList({
@@ -53,23 +54,32 @@ export function TransactionList({
                   ? getCategoryName(txn.categoryKey)
                   : txn.counterparty || t("dashboard.uncategorized")}
               </p>
-              <div className="flex items-center gap-1.5 text-xs text-slate-500">
+              <div className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-xs text-slate-500">
                 <span>
                   {new Date(txn.occurredAt).toLocaleDateString(dateLocale, {
+                    year: "numeric",
                     month: "short",
                     day: "numeric",
                   })}
                 </span>
-                {txn.counterparty && txn.categoryKey && (
-                  <span className="truncate max-w-[140px]">
+                {txn.counterparty && (
+                  <span className="text-slate-600">
                     · {txn.counterparty}
                   </span>
                 )}
+                {txn.provider && (
+                  <Badge variant="outline" className="text-[10px] px-1 py-0 h-4">
+                    {txn.provider}
+                  </Badge>
+                )}
+                {txn.reference && (
+                  <span className="text-slate-400">Ref: {txn.reference}</span>
+                )}
                 {txn.source === "telegram" && (
-                  <Badge variant="secondary">telegram</Badge>
+                  <Badge variant="secondary" className="text-[10px] px-1 py-0 h-4">telegram</Badge>
                 )}
                 {txn.status === "uncategorized" && (
-                  <Badge variant="warning">{t("dashboard.uncategorized")}</Badge>
+                  <Badge variant="warning" className="text-[10px] px-1 py-0 h-4">{t("dashboard.uncategorized")}</Badge>
                 )}
               </div>
             </div>

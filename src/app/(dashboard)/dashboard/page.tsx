@@ -180,14 +180,25 @@ export default async function DashboardPage() {
                           ? getCategoryName(txn.categoryKey)
                           : txn.counterparty || t("dashboard.uncategorized")}
                       </p>
-                      <p className="text-xs text-slate-500 truncate">
-                        {new Date(txn.occurredAt).toLocaleDateString()}{" "}
+                      <div className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-xs text-slate-500">
+                        <span>{new Date(txn.occurredAt).toLocaleDateString()}</span>
+                        {txn.counterparty && (
+                          <span className="text-slate-600">· {txn.counterparty}</span>
+                        )}
+                        {txn.provider && (
+                          <Badge variant="outline" className="text-[10px] px-1 py-0 h-4">
+                            {txn.provider}
+                          </Badge>
+                        )}
+                        {txn.reference && (
+                          <span className="text-slate-400">Ref: {txn.reference}</span>
+                        )}
                         {txn.source === "telegram" && (
-                          <Badge variant="secondary" className="ml-1">
+                          <Badge variant="secondary" className="text-[10px] px-1 py-0 h-4">
                             telegram
                           </Badge>
                         )}
-                      </p>
+                      </div>
                     </div>
                   </div>
                   <span
