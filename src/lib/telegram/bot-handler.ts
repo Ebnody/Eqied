@@ -82,7 +82,7 @@ async function handleStart(message: TgMessage) {
         : DEFAULT_LOCALE;
       const t = tForLocale(locale);
       const dashUrl = buildDashboardUrl();
-      const addUrl = buildAppUrl("/income");
+      const addUrl = buildAppUrl("/miniapp");
       const txUrl = buildTransactionsUrl();
       if (existing.user.isVerified) {
         const keyboard = replyKeyboard([
@@ -160,7 +160,7 @@ async function handleStart(message: TgMessage) {
   const t = tForLocale(locale);
   if (user.isVerified) {
     const dashUrl = buildDashboardUrl();
-    const addUrl = buildAppUrl("/income");
+    const addUrl = buildAppUrl("/miniapp");
     const txUrl = buildTransactionsUrl();
     const keyboard = replyKeyboard([
       dashUrl && addUrl ? [webAppButton("📊 Dashboard", dashUrl), webAppButton("➕ Add", addUrl)] : [],
