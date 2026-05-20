@@ -101,7 +101,7 @@ export function MiniAppClient() {
 
   // Telegram passes initData via the URL hash (e.g. #tgWebAppData=...).
   // We read it directly so we don't depend on telegram-web-app.js loading.
-  // The script is still loaded for nice features (haptics, MainButton) but
+  // The script is still loaded for nicety features (haptics, MainButton) but
   // the core auth flow works without it.
   useEffect(() => {
     function readInitDataFromHash(): string | null {
@@ -144,6 +144,15 @@ export function MiniAppClient() {
       document.head.appendChild(s);
     }
 
+    // FAST PATH: if we have a token from the bot (?t=...), show form immediately
+    // Token-based auth is our primary flow now.
+    const urlToken = getUrlToken();
+    if (urlToken) {
+      setTgState("ready");
+      setDebug("token-auth");
+      return;
+    }
+
     // Try hash first — this is set by Telegram when opening the Mini App.
     const fromHash = readInitDataFromHash();
     if (fromHash) {
@@ -164,7 +173,7 @@ export function MiniAppClient() {
     let cancelled = false;
     let elapsed = 0;
     const interval = 200;
-    const maxWait = 3000;
+    const maxWait = 1500; // reduced since token is primary auth
     const tick = () => {
       if (cancelled) return;
       const data = readInitDataFromHash() ?? readInitDataFromObject();
