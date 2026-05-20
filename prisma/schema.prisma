@@ -1,0 +1,376 @@
+// EthioBudget Tracker - Prisma schema
+// Using SQLite for fast local dev. To switch to PostgreSQL for production:
+//   1. Change provider to "postgresql"
+//   2. Update DATABASE_URL in .env
+//   3. Run: npx prisma migrate dev --name init
+//
+// Money is stored as INTEGER in santim (1 ETB = 100 santim) for precision.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_DATABASE_URL")
+}
+
+// =================== USERS & AUTH ===================
+
+model User {
+  id                  String   @id @default(cuid())
+  phone               String?  @unique
+  telegramUsername    String?  @unique
+  passwordHash        String?
+  isVerified          Boolean  @default(false)
+  fullName            String?
+  linkToken           String?  @unique
+  linkTokenExpiresAt  DateTime?
+  preferredLocale     String   @default("en") // "en" | "am" | "om" | "ti"
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  otps              OtpCode[]
+  telegramLink      TelegramLink?
+  salaries          MonthlySalary[]
+  budgets           Budget[]
+  transactions      Transaction[]
+  forwardedSms      ForwardedSms[]
+  notifications     Notification[]
+  settings          UserSettings?
+
+  roommateMemberships RoommateGroupMember[]
+  roommateGroupsOwned RoommateGroup[]       @relation("RoommateGroupOwner")
+  roommateInvitesSent RoommateInvite[]      @relation("RoommateInviteCreator")
+
+  @@index([phone])
+  @@index([telegramUsername])
+}
+
+model OtpCode {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  codeHash  String
+  purpose   String   // "signup" | "login" | "reset"
+  expiresAt DateTime
+  consumed  Boolean  @default(false)
+  attempts  Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([userId, purpose])
+  @@index([expiresAt])
+}
+
+model TelegramLink {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  chatId      String   @unique
+  username    String?
+  firstName   String?
+  lastName    String?
+  linkedAt    DateTime @default(now())
+
+  @@index([chatId])
+}
+
+// =================== SALARY & BUDGET ===================
+
+model MonthlySalary {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  month     String   // "YYYY-MM"
+  amount    Int      // santim
+  source    String   @default("salary") // salary | business | freelance | other
+  receivedAt DateTime?
+  isReceived Boolean @default(false)
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, month])
+  @@index([userId, month])
+}
+
+model Budget {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  month         String   // "YYYY-MM"
+  totalPlanned  Int      // santim, sum of categories
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  categories    BudgetCategory[]
+
+  @@unique([userId, month])
+  @@index([userId, month])
+}
+
+model BudgetCategory {
+  id              String  @id @default(cuid())
+  budgetId        String
+  budget          Budget  @relation(fields: [budgetId], references: [id], onDelete: Cascade)
+  categoryKey     String  // matches CATEGORY_KEYS constant
+  name            String
+  plannedAmount   Int     // santim
+  plannedPercent  Float
+  sortOrder       Int     @default(0)
+
+  @@unique([budgetId, categoryKey])
+  @@index([budgetId])
+}
+
+// =================== TRANSACTIONS ===================
+
+model Transaction {
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  type            String   // "income" | "expense"
+  amount          Int      // santim, always positive
+  categoryKey     String?  // null when uncategorized
+  status          String   @default("categorized") // "uncategorized" | "categorized" | "ignored" | "duplicate"
+
+  source          String   // "manual" | "sms" | "telegram" | "telebirr_api" | "chapa_api"
+  paymentMethod   String?  // "cash" | "telebirr" | "bank_transfer" | "mobile_banking" | "chapa" | "other"
+  provider        String?  // "telebirr" | "cbe" | "awash" | "dashen" | etc.
+
+  counterparty    String?  // sender or receiver name
+  counterpartyPhone String?
+  reference       String?  // transaction ID/reference
+  balanceAfter    Int?     // santim, if SMS includes balance
+
+  occurredAt      DateTime @default(now())
+  notes           String?
+
+  forwardedSmsId  String?  @unique
+  forwardedSms    ForwardedSms? @relation(fields: [forwardedSmsId], references: [id], onDelete: SetNull)
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([userId, occurredAt])
+  @@index([userId, status])
+  @@index([userId, type, occurredAt])
+  @@index([userId, categoryKey])
+  @@index([reference])
+}
+
+model ForwardedSms {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  rawText       String
+  provider      String?  // detected provider key
+  parsedOk      Boolean  @default(false)
+  parsedData    String?  // JSON-stringified parser output
+  parserName    String?
+
+  transaction   Transaction?
+  createdAt     DateTime @default(now())
+
+  @@index([userId, createdAt])
+}
+
+// =================== NOTIFICATIONS & SETTINGS ===================
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String   // "salary_reminder" | "overspend" | "uncategorized" | "monthly_report" | "info"
+  title     String
+  message   String
+  read      Boolean  @default(false)
+  meta      String?  // JSON string for additional data
+  createdAt DateTime @default(now())
+
+  @@index([userId, read, createdAt])
+}
+
+model UserSettings {
+  id                       String   @id @default(cuid())
+  userId                   String   @unique
+  user                     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  currency                 String   @default("ETB")
+  language                 String   @default("en") // "en" | "am"
+  telegramNotifications    Boolean  @default(true)
+  monthlyReminderEnabled   Boolean  @default(true)
+  overspendAlertsEnabled   Boolean  @default(true)
+  dailySummaryEnabled      Boolean  @default(false)
+  updatedAt                DateTime @updatedAt
+}
+
+// =================== ROOMMATE GROUPS ===================
+// Shared-expense ledger for a household. One person creates the group,
+// invites roommates by Telegram username, and members share expenses
+// (equal / percent / exact splits) plus inter-member loans. The system
+// computes net balances and an optimized settlement plan.
+
+model RoommateGroup {
+  id            String   @id @default(cuid())
+  name          String
+  description   String?
+  passwordHash  String   // single shared password for group-session login
+  createdById   String
+  createdBy     User     @relation("RoommateGroupOwner", fields: [createdById], references: [id], onDelete: Restrict)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  members       RoommateGroupMember[]
+  invites       RoommateInvite[]
+  expenses      RoommateExpense[]
+  loans         RoommateLoan[]
+  settlements   RoommateSettlement[]
+  activityLogs  RoommateActivityLog[]
+
+  @@index([createdById])
+}
+
+model RoommateGroupMember {
+  id          String   @id @default(cuid())
+  groupId     String
+  group       RoommateGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role        String   @default("member") // "owner" | "admin" | "member"
+  nickname    String?
+  joinedAt    DateTime @default(now())
+
+  paidExpenses        RoommateExpense[]      @relation("ExpensePaidBy")
+  createdExpenses     RoommateExpense[]      @relation("ExpenseCreatedBy")
+  expenseSplits       RoommateExpenseSplit[]
+  loansLent           RoommateLoan[]         @relation("LoanLender")
+  loansBorrowed       RoommateLoan[]         @relation("LoanBorrower")
+  settlementsPaid     RoommateSettlement[]   @relation("SettlementFrom")
+  settlementsReceived RoommateSettlement[]   @relation("SettlementTo")
+  activityLogs        RoommateActivityLog[]
+  sessions            RoommateGroupSession[]
+
+  @@unique([groupId, userId])
+  @@index([userId])
+}
+
+model RoommateInvite {
+  id                 String   @id @default(cuid())
+  groupId            String
+  group              RoommateGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  telegramUsername   String   // normalized lowercase, no @
+  token              String   @unique // used in /start invite_<token>
+  invitedById        String
+  invitedBy          User     @relation("RoommateInviteCreator", fields: [invitedById], references: [id], onDelete: Cascade)
+  status             String   @default("pending") // "pending" | "accepted" | "declined" | "expired" | "revoked"
+  acceptedUserId     String?  // user that accepted, if any
+  createdAt          DateTime @default(now())
+  expiresAt          DateTime
+  respondedAt        DateTime?
+
+  @@index([groupId, status])
+  @@index([telegramUsername])
+}
+
+model RoommateExpense {
+  id              String   @id @default(cuid())
+  groupId         String
+  group           RoommateGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  title           String
+  amount          Int      // santim
+  categoryKey     String   // rent | electricity | internet | food | cleaning | house | other
+  splitType       String   // "equal" | "percent" | "exact"
+  paidByMemberId  String
+  paidBy          RoommateGroupMember @relation("ExpensePaidBy", fields: [paidByMemberId], references: [id], onDelete: Restrict)
+  createdByMemberId String
+  createdBy       RoommateGroupMember @relation("ExpenseCreatedBy", fields: [createdByMemberId], references: [id], onDelete: Restrict)
+  occurredAt      DateTime @default(now())
+  notes           String?
+  receiptUrl      String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  splits          RoommateExpenseSplit[]
+
+  @@index([groupId, occurredAt])
+  @@index([groupId, categoryKey])
+}
+
+model RoommateExpenseSplit {
+  id          String   @id @default(cuid())
+  expenseId   String
+  expense     RoommateExpense @relation(fields: [expenseId], references: [id], onDelete: Cascade)
+  memberId    String
+  member      RoommateGroupMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  share       Int      // santim; sum across splits for an expense must equal expense.amount
+
+  @@unique([expenseId, memberId])
+  @@index([memberId])
+}
+
+model RoommateLoan {
+  id                String   @id @default(cuid())
+  groupId           String
+  group             RoommateGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  lenderMemberId    String
+  lender            RoommateGroupMember @relation("LoanLender", fields: [lenderMemberId], references: [id], onDelete: Restrict)
+  borrowerMemberId  String
+  borrower          RoommateGroupMember @relation("LoanBorrower", fields: [borrowerMemberId], references: [id], onDelete: Restrict)
+  amount            Int      // santim
+  paid              Int      @default(0) // santim repaid so far
+  reason            String?
+  status            String   @default("unpaid") // "unpaid" | "partial" | "paid"
+  occurredAt        DateTime @default(now())
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([groupId, status])
+  @@index([lenderMemberId])
+  @@index([borrowerMemberId])
+}
+
+model RoommateSettlement {
+  id              String   @id @default(cuid())
+  groupId         String
+  group           RoommateGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  fromMemberId    String
+  fromMember      RoommateGroupMember @relation("SettlementFrom", fields: [fromMemberId], references: [id], onDelete: Restrict)
+  toMemberId      String
+  toMember        RoommateGroupMember @relation("SettlementTo", fields: [toMemberId], references: [id], onDelete: Restrict)
+  amount          Int      // santim
+  status          String   @default("recorded") // "recorded" (manual confirmation)
+  notes           String?
+  settledAt       DateTime @default(now())
+  createdAt       DateTime @default(now())
+
+  @@index([groupId, settledAt])
+}
+
+model RoommateActivityLog {
+  id              String   @id @default(cuid())
+  groupId         String
+  group           RoommateGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  actorMemberId   String?
+  actor           RoommateGroupMember? @relation(fields: [actorMemberId], references: [id], onDelete: SetNull)
+  kind            String   // "expense_added" | "expense_edited" | "loan_added" | "loan_paid" | "settlement" | "member_joined" | "member_invited" | "invite_accepted" | "invite_declined"
+  payload         String?  // JSON string
+  createdAt       DateTime @default(now())
+
+  @@index([groupId, createdAt])
+}
+
+model RoommateGroupSession {
+  id          String   @id @default(cuid())
+  memberId    String
+  member      RoommateGroupMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  jti         String   @unique // JWT ID for revocation
+  createdAt   DateTime @default(now())
+  expiresAt   DateTime
+  revokedAt   DateTime?
+
+  @@index([memberId])
+  @@index([expiresAt])
+}

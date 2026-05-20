@@ -1,0 +1,32 @@
+@import "tailwindcss";
+
+/* When the user's locale uses Ge'ez (Ethiopic) script, prefer the Ethiopic
+   font for proper rendering of አማርኛ / ትግርኛ. */
+html[data-script="ethiopic"] body {
+  font-family:
+    var(--font-ethiopic),
+    var(--font-geist-sans),
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+}
+
+:root {
+  --background: #f8fafc;
+  --foreground: #0f172a;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), system-ui, -apple-system, "Segoe UI", Roboto,
+    Helvetica, Arial, sans-serif;
+}
