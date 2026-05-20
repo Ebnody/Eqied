@@ -249,7 +249,7 @@ export function MiniAppClient() {
     setSaving(true);
     setMessage(null);
     const payload = {
-      initData,
+      initData: initData || undefined,
       text: text || undefined,
       type,
       amountEtb,

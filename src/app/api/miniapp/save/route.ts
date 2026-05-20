@@ -6,7 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { toSantim } from "@/lib/utils";
 
 const schema = z.object({
-  initData: z.string().optional(),
+  initData: z.string().nullish(),
   text: z.string().max(2000).optional(),
   // optional manual overrides if parser gets it wrong
   type: z.enum(["income", "expense"]).optional(),

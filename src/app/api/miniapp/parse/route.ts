@@ -4,7 +4,7 @@ import { resolveMiniAppUserWithFallback } from "@/lib/telegram/webapp-auth";
 import { parseTransactionSms } from "@/lib/telegram/parsers";
 
 const schema = z.object({
-  initData: z.string().optional(),
+  initData: z.string().nullish(),
   text: z.string().min(3).max(2000),
 });
 
