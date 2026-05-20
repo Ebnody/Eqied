@@ -1,5 +1,6 @@
 import { ParsedSms, SmsParser } from "./types";
 import { telebirrParser } from "./telebirr";
+import { ethiopianBanksParser } from "./ethiopian-banks";
 import { cbeParser } from "./cbe";
 import { awashParser } from "./awash";
 import { dashenParser } from "./dashen";
@@ -7,6 +8,7 @@ import { genericParser } from "./generic";
 
 const PARSERS: SmsParser[] = [
   telebirrParser,
+  ethiopianBanksParser, // Catches ALL Ethiopian banks (CBE, Awash, Dashen, NIB, etc.)
   awashParser,
   cbeParser,
   dashenParser,
