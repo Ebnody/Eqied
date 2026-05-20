@@ -25,6 +25,15 @@ export const genericParser: SmsParser = (text: string): ParsedSms | null => {
 
   result.reference = extractReference(text);
 
+  // Counterparty for transfers: "To 1000713196348 (ZEMBA GAZEBO PLC)"
+  const toMatch = text.match(/\bto\s+[\d\s]+\(([^)]+)\)/i);
+  if (toMatch) {
+    result.counterparty = toMatch[1].trim();
+  } else {
+    const fromMatch = text.match(/\bfrom\s+([A-Z][A-Za-z\s]+?)(?:\.|,|\s+with|\s+on\b)/i);
+    if (fromMatch) result.counterparty = fromMatch[1].trim();
+  }
+
   // Only successful if we extracted at least an amount
   result.ok = !!result.amountSantim;
   return result;

@@ -5,7 +5,8 @@
 //  3. Forwarded transaction SMS → saved as uncategorized; user categorizes on the web app
 
 import { prisma } from "../prisma";
-import { sendTelegramMessage } from "./send";
+import { sendTelegramMessage, setChatMenuButton } from "./send";
+import { createSessionToken } from "@/lib/auth";
 import { parseTransactionSms } from "./parsers";
 import { formatETB } from "../utils";
 import { tForLocale } from "@/i18n/server";
@@ -50,13 +51,10 @@ function inlineKeyboard(rows: { text: string; url?: string; callback_data?: stri
 }
 
 // Reply keyboard builders (persistent bottom buttons)
-function webAppButton(text: string, url: string) {
-  return { text, web_app: { url } };
-}
 function textButton(text: string) {
   return { text };
 }
-function replyKeyboard(rows: { text: string; web_app?: { url: string } }[][], opts?: { resize?: boolean; oneTime?: boolean }) {
+function replyKeyboard(rows: { text: string }[][], opts?: { resize?: boolean; oneTime?: boolean }) {
   return {
     keyboard: rows,
     resize_keyboard: opts?.resize ?? true,
@@ -81,15 +79,14 @@ async function handleStart(message: TgMessage) {
         ? existing.user.preferredLocale
         : DEFAULT_LOCALE;
       const t = tForLocale(locale);
-      const dashUrl = buildDashboardUrl();
-      const addUrl = buildAppUrl("/miniapp");
-      const txUrl = buildTransactionsUrl();
       if (existing.user.isVerified) {
+        // Remove the persistent menu button (bottom-left "Add" button)
+        await setChatMenuButton({ type: "default" });
         const keyboard = replyKeyboard([
-          dashUrl && addUrl ? [webAppButton("📊 Dashboard", dashUrl), webAppButton("➕ Add", addUrl)] : [],
-          txUrl ? [webAppButton("📝 Transactions", txUrl)] : [],
+          [textButton("📊 Dashboard"), textButton("📝 Transactions")],
+          [textButton("➕ Add")],
           [textButton("❓ Help"), textButton("🌐 Language")],
-        ].filter((r) => r.length > 0));
+        ]);
         await sendTelegramMessage(
           chatId,
           `${t("bot.welcomeBack", { name: existing.user.fullName ?? "" })}`,
@@ -159,14 +156,12 @@ async function handleStart(message: TgMessage) {
     : DEFAULT_LOCALE;
   const t = tForLocale(locale);
   if (user.isVerified) {
-    const dashUrl = buildDashboardUrl();
-    const addUrl = buildAppUrl("/miniapp");
-    const txUrl = buildTransactionsUrl();
+    await setChatMenuButton({ type: "default" });
     const keyboard = replyKeyboard([
-      dashUrl && addUrl ? [webAppButton("📊 Dashboard", dashUrl), webAppButton("➕ Add", addUrl)] : [],
-      txUrl ? [webAppButton("📝 Transactions", txUrl)] : [],
+      [textButton("📊 Dashboard"), textButton("📝 Transactions")],
+      [textButton("➕ Add")],
       [textButton("❓ Help"), textButton("🌐 Language")],
-    ].filter((r) => r.length > 0));
+    ]);
     await sendTelegramMessage(
       chatId,
       `${t("bot.linkedVerified")}`,
@@ -384,6 +379,52 @@ export async function handleTelegramUpdate(update: TgUpdate) {
     if (text.startsWith("/help")) {
       const chatId = String(update.message.chat.id);
       await handleHelpMessage(chatId);
+      return;
+    }
+
+    if (text === "📊 Dashboard" || text === "Dashboard") {
+      const chatId = String(update.message.chat.id);
+      const dashUrl = buildDashboardUrl();
+      if (dashUrl) {
+        const keyboard = inlineKeyboard([[urlButton("Open Dashboard", dashUrl)]]);
+        await sendTelegramMessage(chatId, "📊 Open your dashboard:", { reply_markup: keyboard });
+      } else {
+        await sendTelegramMessage(chatId, "Dashboard link is not configured.");
+      }
+      return;
+    }
+
+    if (text === "📝 Transactions" || text === "Transactions") {
+      const chatId = String(update.message.chat.id);
+      const txUrl = buildTransactionsUrl();
+      if (txUrl) {
+        const keyboard = inlineKeyboard([[urlButton("View Transactions", txUrl)]]);
+        await sendTelegramMessage(chatId, "📝 View and categorize your transactions:", { reply_markup: keyboard });
+      } else {
+        await sendTelegramMessage(chatId, "Transactions link is not configured.");
+      }
+      return;
+    }
+
+    if (text === "➕ Add" || text === "Add") {
+      const chatId = String(update.message.chat.id);
+      const link = await prisma.telegramLink.findUnique({
+        where: { chatId },
+        include: { user: true },
+      });
+      if (!link || !link.user.isVerified) {
+        await sendTelegramMessage(chatId, "👋 Your account isn't linked yet. Please send /start to link your account.");
+        return;
+      }
+      const token = await createSessionToken(link.user.id);
+      const baseUrl = buildAppUrl("/miniapp");
+      if (baseUrl) {
+        const miniUrl = `${baseUrl}?t=${token}`;
+        const keyboard = inlineKeyboard([[urlButton("➕ Quick Add", miniUrl)]]);
+        await sendTelegramMessage(chatId, "➕ Tap to open Quick Add:", { reply_markup: keyboard });
+      } else {
+        await sendTelegramMessage(chatId, "App URL is not configured.");
+      }
       return;
     }
 

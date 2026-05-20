@@ -9,11 +9,26 @@ import { fromSantim } from "@/lib/utils";
 import { Loader2, CheckCircle2, AlertCircle, Wand2 } from "lucide-react";
 import { useI18n } from "@/i18n/provider";
 
+function getUrlToken(): string | null {
+  if (typeof window === "undefined") return null;
+  const params = new URLSearchParams(window.location.search);
+  return params.get("t");
+}
+
 function getAuthHeaders(): Record<string, string> {
   const headers: Record<string, string> = { "Content-Type": "application/json" };
   if (typeof window !== "undefined") {
-    const token = localStorage.getItem("ethiobudget_token");
-    if (token) headers["x-ethiobudget-token"] = token;
+    // Check URL token first (from bot-generated link), then localStorage
+    const urlToken = getUrlToken();
+    const storedToken = localStorage.getItem("ethiobudget_token");
+    const token = urlToken || storedToken;
+    if (token) {
+      headers["x-ethiobudget-token"] = token;
+      // Persist URL token to localStorage for future requests
+      if (urlToken && urlToken !== storedToken) {
+        localStorage.setItem("ethiobudget_token", urlToken);
+      }
+    }
   }
   return headers;
 }

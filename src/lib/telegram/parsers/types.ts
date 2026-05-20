@@ -103,6 +103,7 @@ export function extractReference(text: string): string | undefined {
   // Common patterns: "Transaction Reference: ABC123" or "Ref. No: XYZ" or "TxnID: 12345"
   const patterns = [
     /(?:transaction\s+(?:reference|id|number)|ref(?:erence)?\.?\s*(?:no\.?|#|number)?|txn\s*id|ttn|trace\s*id)[:\s]+([A-Z0-9]{6,})/i,
+    /\bwith\s+reference\s+([A-Z0-9]{6,})/i,
     /\bRef[:\s]+([A-Z0-9]{6,})/i,
   ];
   for (const p of patterns) {

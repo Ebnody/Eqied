@@ -31,7 +31,7 @@ export const cbeParser: SmsParser = (text: string): ParsedSms | null => {
   };
 
   if (/credited/i.test(text)) result.type = "income";
-  else if (/debited|withdrawn/i.test(text)) result.type = "expense";
+  else if (/debited|withdrawn|transferred|purchased/i.test(text)) result.type = "expense";
 
   const { amountSantim, rawAmountText } = extractAmount(text);
   result.amountSantim = amountSantim;
@@ -39,6 +39,15 @@ export const cbeParser: SmsParser = (text: string): ParsedSms | null => {
 
   result.reference = extractReference(text);
   result.occurredAt = extractDate(text);
+
+  // Counterparty for transfers: "To 1000713196348 (ZEMBA GAZEBO PLC)"
+  const toMatch = text.match(/\bto\s+[\d\s]+\(([^)]+)\)/i);
+  if (toMatch) {
+    result.counterparty = toMatch[1].trim();
+  } else {
+    const fromMatch = text.match(/\bfrom\s+([A-Z][A-Za-z\s]+?)(?:\.|,|\s+with|\s+on\b)/i);
+    if (fromMatch) result.counterparty = fromMatch[1].trim();
+  }
 
   // Account number (last 4 digits, used as a hint of the account)
   const acct = text.match(/account\s+([\dx*]+)/i);

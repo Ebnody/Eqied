@@ -7,8 +7,8 @@ import { genericParser } from "./generic";
 
 const PARSERS: SmsParser[] = [
   telebirrParser,
-  cbeParser,
   awashParser,
+  cbeParser,
   dashenParser,
   genericParser,
 ];
