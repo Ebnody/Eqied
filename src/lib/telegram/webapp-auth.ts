@@ -1,6 +1,6 @@
 import { createHmac } from "node:crypto";
 import { prisma } from "@/lib/prisma";
-import { getCurrentUser } from "@/lib/auth";
+import { getCurrentUser, verifySessionToken } from "@/lib/auth";
 
 // Validates the initData string sent by a Telegram Mini App.
 // See: https://core.telegram.org/bots/webapps#validating-data-received-via-the-mini-app
@@ -90,13 +90,27 @@ export async function resolveMiniAppUser(initData: string) {
   return { ok: true as const, user: link.user, telegramUser: v.user };
 }
 
-// Fallback: tries initData first, then falls back to session cookie.
+// Fallback: tries initData first, then explicit token, then session cookie.
 // This allows the Mini App to work when opened from Reply Keyboard web_app
 // buttons or Telegram Web where initData may not be present.
-export async function resolveMiniAppUserWithFallback(initData?: string | null) {
+export async function resolveMiniAppUserWithFallback(
+  initData?: string | null,
+  fallbackToken?: string | null
+) {
   if (initData && initData.length > 10) {
     const r = await resolveMiniAppUser(initData);
     if (r.ok) return r;
+  }
+  // Fallback to explicit token (from localStorage header)
+  if (fallbackToken) {
+    const userId = await verifySessionToken(fallbackToken);
+    if (userId) {
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        include: { telegramLink: true },
+      });
+      if (user) return { ok: true as const, user };
+    }
   }
   // Fallback to cookie-based session
   try {

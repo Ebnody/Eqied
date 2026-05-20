@@ -4,6 +4,7 @@ import "./globals.css";
 import { resolveLocale } from "@/i18n/server";
 import { I18nProvider } from "@/i18n/provider";
 import { isEthiopicLocale } from "@/i18n/config";
+import { AuthSync } from "@/components/auth-sync";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -54,6 +55,7 @@ export default async function RootLayout({
       data-script={isEthiopicLocale(locale) ? "ethiopic" : "latin"}
     >
       <body className="min-h-full flex flex-col">
+        <AuthSync />
         <I18nProvider locale={locale}>{children}</I18nProvider>
       </body>
     </html>

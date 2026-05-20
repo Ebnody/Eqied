@@ -9,6 +9,15 @@ import { fromSantim } from "@/lib/utils";
 import { Loader2, CheckCircle2, AlertCircle, Wand2 } from "lucide-react";
 import { useI18n } from "@/i18n/provider";
 
+function getAuthHeaders(): Record<string, string> {
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  if (typeof window !== "undefined") {
+    const token = localStorage.getItem("ethiobudget_token");
+    if (token) headers["x-ethiobudget-token"] = token;
+  }
+  return headers;
+}
+
 type ParseResult = {
   ok: boolean;
   provider: string;
@@ -185,7 +194,7 @@ export function MiniAppClient() {
     try {
       const res = await fetch("/api/miniapp/parse", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: getAuthHeaders(),
         body: JSON.stringify({ initData, text }),
       });
       const data = (await res.json()) as ParseResult & { error?: string };
@@ -218,7 +227,7 @@ export function MiniAppClient() {
     try {
       const res = await fetch("/api/miniapp/save", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: getAuthHeaders(),
         body: JSON.stringify({
           initData,
           text: text || undefined,

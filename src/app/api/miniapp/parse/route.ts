@@ -15,7 +15,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "validation" }, { status: 400 });
   }
 
-  const auth = await resolveMiniAppUserWithFallback(parsed.data.initData);
+  const fallbackToken = req.headers.get("x-ethiobudget-token");
+  const auth = await resolveMiniAppUserWithFallback(parsed.data.initData, fallbackToken);
   if (!auth.ok) {
     return NextResponse.json({ error: auth.reason }, { status: 401 });
   }

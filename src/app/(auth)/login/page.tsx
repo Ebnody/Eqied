@@ -48,6 +48,10 @@ export default function LoginPage() {
         setError(data.error || t("auth.loginFailed"));
         return;
       }
+      // Store token in localStorage for Telegram WebView compatibility
+      if (data.token && typeof window !== "undefined") {
+        localStorage.setItem("ethiobudget_token", data.token);
+      }
       router.push(next);
       router.refresh();
     } catch {
