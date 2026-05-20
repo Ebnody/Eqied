@@ -38,6 +38,17 @@ export interface TgUpdate {
   callback_query?: TgCallbackQuery;
 }
 
+// Inline keyboard builders
+function urlButton(text: string, url: string) {
+  return { text, url };
+}
+function callbackButton(text: string, data: string) {
+  return { text, callback_data: data };
+}
+function inlineKeyboard(rows: { text: string; url?: string; callback_data?: string }[][]) {
+  return { inline_keyboard: rows };
+}
+
 async function handleStart(message: TgMessage) {
   const chatId = String(message.chat.id);
   const text = message.text ?? "";
@@ -56,13 +67,18 @@ async function handleStart(message: TgMessage) {
         : DEFAULT_LOCALE;
       const t = tForLocale(locale);
       const dashUrl = buildDashboardUrl();
+      const addUrl = buildAppUrl("/income");
       if (existing.user.isVerified) {
-        const lines = [
-          `${t("bot.welcomeBack", { name: existing.user.fullName ?? "" })}`,
-          "",
-          dashUrl ? `Open your dashboard: ${dashUrl}` : "Use the EthioBudget website for all features.",
-        ];
-        await sendTelegramMessage(chatId, lines.join("\n"));
+        const keyboard = inlineKeyboard([
+          dashUrl ? [urlButton("📊 Dashboard", dashUrl)] : [],
+          addUrl ? [urlButton("➕ Add Transaction", addUrl)] : [],
+          [callbackButton("❓ Help", "btn:help"), callbackButton("🌐 Language", "btn:language")],
+        ].filter((r) => r.length > 0));
+        await sendTelegramMessage(
+          chatId,
+          `${t("bot.welcomeBack", { name: existing.user.fullName ?? "" })}\n\nWhat would you like to do?`,
+          { reply_markup: keyboard }
+        );
       } else {
         await sendTelegramMessage(chatId, t("bot.linkedUnverified"));
       }
@@ -126,10 +142,22 @@ async function handleStart(message: TgMessage) {
     ? user.preferredLocale
     : DEFAULT_LOCALE;
   const t = tForLocale(locale);
-  await sendTelegramMessage(
-    chatId,
-    user.isVerified ? t("bot.linkedVerified") : t("bot.linkedUnverified")
-  );
+  if (user.isVerified) {
+    const dashUrl = buildDashboardUrl();
+    const addUrl = buildAppUrl("/income");
+    const keyboard = inlineKeyboard([
+      dashUrl ? [urlButton("📊 Dashboard", dashUrl)] : [],
+      addUrl ? [urlButton("➕ Add Transaction", addUrl)] : [],
+      [callbackButton("❓ Help", "btn:help"), callbackButton("🌐 Language", "btn:language")],
+    ].filter((r) => r.length > 0));
+    await sendTelegramMessage(
+      chatId,
+      `${t("bot.linkedVerified")}\n\nWhat would you like to do?`,
+      { reply_markup: keyboard }
+    );
+  } else {
+    await sendTelegramMessage(chatId, t("bot.linkedUnverified"));
+  }
 }
 
 // Build a deep link to the transactions page so the user can categorize on the web.
@@ -237,6 +265,7 @@ async function handleTransactionSms(message: TgMessage) {
   }
 
   const txUrl = buildTransactionsUrl();
+  const dashUrl = buildDashboardUrl();
   const directionEmoji = parsed.type === "income" ? "📥" : "📤";
   const summary = [
     `${directionEmoji} *${parsed.type === "income" ? "Income" : "Expense"} saved*`,
@@ -245,28 +274,85 @@ async function handleTransactionSms(message: TgMessage) {
       ? `${parsed.type === "income" ? "From" : "To"}: ${parsed.counterparty}`
       : null,
     parsed.reference ? `Ref: ${parsed.reference}` : null,
-    "",
-    txUrl
-      ? `Open the website to choose a category:\n${txUrl}`
-      : "Open the EthioBudget website to choose a category.",
   ]
     .filter(Boolean)
     .join("\n");
 
-  await sendTelegramMessage(chatId, summary, { parse_mode: "Markdown" });
+  const keyboard = inlineKeyboard([
+    txUrl ? [urlButton("📝 Categorize", txUrl)] : [],
+    dashUrl ? [urlButton("📊 Dashboard", dashUrl)] : [],
+    [callbackButton("❓ Help", "btn:help")],
+  ].filter((r) => r.length > 0));
+
+  await sendTelegramMessage(chatId, summary, { parse_mode: "Markdown", reply_markup: keyboard });
 }
 
-async function handleCallbackQuery(cq: TgCallbackQuery) {
-  // We no longer use callback queries, but answer them to avoid the
-  // "loading..." spinner sticking on old messages.
+async function answerCallback(cqId: string) {
   const token = process.env.TELEGRAM_BOT_TOKEN;
-  if (token && cq.id) {
+  if (token) {
     await fetch(`https://api.telegram.org/bot${token}/answerCallbackQuery`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ callback_query_id: cq.id }),
+      body: JSON.stringify({ callback_query_id: cqId }),
     });
   }
+}
+
+async function handleCallbackQuery(cq: TgCallbackQuery) {
+  await answerCallback(cq.id);
+  const chatId = String(cq.message?.chat.id ?? cq.from.id);
+  const data = cq.data ?? "";
+
+  if (data === "btn:help") {
+    await handleHelpMessage(chatId);
+    return;
+  }
+  if (data === "btn:language") {
+    const keyboard = inlineKeyboard([
+      [callbackButton("English", "lang:en"), callbackButton("Amharic", "lang:am")],
+      [callbackButton("Oromo", "lang:om"), callbackButton("Tigrigna", "lang:ti")],
+    ]);
+    await sendTelegramMessage(
+      chatId,
+      "🌐 Choose your preferred language:\n\nCurrent: English",
+      { reply_markup: keyboard }
+    );
+    return;
+  }
+  if (data.startsWith("lang:")) {
+    const locale = data.replace("lang:", "");
+    const link = await prisma.telegramLink.findUnique({
+      where: { chatId },
+      include: { user: true },
+    });
+    if (link) {
+      await prisma.user.update({
+        where: { id: link.user.id },
+        data: { preferredLocale: locale },
+      });
+    }
+    const names: Record<string, string> = { en: "English", am: "Amharic", om: "Oromo", ti: "Tigrigna" };
+    await sendTelegramMessage(chatId, `Language updated to ${names[locale] ?? locale}. Send /start to refresh.`);
+    return;
+  }
+}
+
+async function handleHelpMessage(chatId: string) {
+  const dashUrl = buildDashboardUrl();
+  const txUrl = buildTransactionsUrl();
+  const lines = [
+    "❓ *EthioBudget Bot Help*",
+    "",
+    "*Forward a bank/telebirr SMS* to automatically save it as a transaction.",
+    "",
+    "*Commands:*",
+    "/start - Open main menu",
+    "/help - Show this help",
+    "",
+    dashUrl ? `📊 [Open Dashboard](${dashUrl})` : "",
+    txUrl ? `📝 [Categorize Transactions](${txUrl})` : "",
+  ];
+  await sendTelegramMessage(chatId, lines.filter(Boolean).join("\n"), { parse_mode: "Markdown" });
 }
 
 export async function handleTelegramUpdate(update: TgUpdate) {
@@ -278,12 +364,17 @@ export async function handleTelegramUpdate(update: TgUpdate) {
       return;
     }
 
-    // Reject any other slash command — those features now live on the website.
+    if (text.startsWith("/help")) {
+      const chatId = String(update.message.chat.id);
+      await handleHelpMessage(chatId);
+      return;
+    }
+
     if (text.startsWith("/")) {
       const chatId = String(update.message.chat.id);
       await sendTelegramMessage(
         chatId,
-        "👋 Please use the EthioBudget website for all features.\nForward a transaction SMS to save it."
+        "👋 I don't know that command.\n\nTry /start for the menu or /help for assistance.\nYou can also forward a transaction SMS to save it."
       );
       return;
     }
