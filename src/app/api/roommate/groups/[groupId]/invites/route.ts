@@ -96,7 +96,11 @@ export async function POST(
     ? `https://t.me/${botUsername}?start=invite_${token}`
     : null;
 
-  // If the invited user is already known to the bot, DM them directly.
+  const group = await prisma.roommateGroup.findUnique({
+    where: { id: groupId },
+  });
+
+  // Try to DM the invited user if they've ever chatted with the bot
   let dmSent = false;
   const candidates = await prisma.user.findMany({
     where: { telegramUsername: { not: null } },
@@ -106,15 +110,44 @@ export async function POST(
     candidates.find(
       (u) => u.telegramUsername!.toLowerCase() === tgUsername
     ) ?? null;
+
   if (known?.telegramLink?.chatId && inviteUrl) {
-    const group = await prisma.roommateGroup.findUnique({
-      where: { id: groupId },
-    });
+    // User has chatted with the bot before — send invite DM directly
     await sendTelegramMessage(
       known.telegramLink.chatId,
-      `🏠 You've been invited to join the roommate group "${group?.name}".\n\nTap the link to accept:\n${inviteUrl}`
+      `🏠 You've been invited to join the roommate group "${group?.name}".\n\n👤 Invited by: @${me.user.telegramUsername ?? "admin"}\n⏳ Expires in 7 days\n\nTap below to accept and join:`
+    );
+    // Send the link as a separate message with a button for better UX
+    await sendTelegramMessage(
+      known.telegramLink.chatId,
+      inviteUrl,
+      {
+        reply_markup: {
+          inline_keyboard: [[
+            { text: "✅ Accept Invite", url: inviteUrl }
+          ]]
+        }
+      }
     );
     dmSent = true;
+  }
+
+  // Notify the admin whether the DM went through or they need to share manually
+  const adminLink = await prisma.telegramLink.findUnique({
+    where: { userId: me.userId },
+  });
+  if (adminLink?.chatId) {
+    if (dmSent) {
+      await sendTelegramMessage(
+        adminLink.chatId,
+        `✅ Invite sent directly to @${tgUsername} via Telegram. They just need to tap the link to join "${group?.name}".`
+      );
+    } else {
+      await sendTelegramMessage(
+        adminLink.chatId,
+        `📤 Invite for @${tgUsername} to join "${group?.name}" created.\n\n⚠️ I couldn't message them directly (they haven't started the bot yet). Please share this link with them:\n\n${inviteUrl}`
+      );
+    }
   }
 
   return NextResponse.json({
