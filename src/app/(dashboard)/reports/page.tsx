@@ -49,7 +49,7 @@ export default async function ReportsPage() {
       actual: monthly.byCategory[c.categoryKey]?.expense ?? 0,
     })) ?? [];
 
-  const totalIncome = monthly.totalSalary + monthly.totalIncome;
+  const totalIncome = monthly.totalIncome;
   const savingsRate =
     totalIncome > 0
       ? Math.round(((totalIncome - monthly.totalExpense) / totalIncome) * 100)
