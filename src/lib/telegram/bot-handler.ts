@@ -102,7 +102,147 @@ async function handleStart(message: TgMessage) {
     return;
   }
 
-  // /start <token>
+  // /start invite_<token>  → roommate group invitation
+  if (linkToken.startsWith("invite_")) {
+    const inviteToken = linkToken.replace("invite_", "");
+    const invite = await prisma.roommateInvite.findUnique({
+      where: { token: inviteToken },
+      include: { group: true },
+    });
+
+    if (!invite) {
+      await sendTelegramMessage(chatId, "❌ This invitation link is invalid.");
+      return;
+    }
+    if (invite.status !== "pending") {
+      await sendTelegramMessage(chatId, "⏰ This invitation has already been used or expired.");
+      return;
+    }
+    if (invite.expiresAt < new Date()) {
+      await prisma.roommateInvite.update({
+        where: { id: invite.id },
+        data: { status: "expired" },
+      });
+      await sendTelegramMessage(chatId, "⏰ This invitation has expired.");
+      return;
+    }
+
+    const tgUser = message.from;
+    const tgUsername = tgUser?.username?.toLowerCase() ?? null;
+
+    // Verify the Telegram username matches the invited one
+    if (tgUsername && tgUsername !== invite.telegramUsername) {
+      await sendTelegramMessage(
+        chatId,
+        `⚠️ This invite was sent to @${invite.telegramUsername}. Your Telegram username (@${tgUser?.username}) doesn't match.`
+      );
+      return;
+    }
+
+    // Find or create user
+    let user = await prisma.user.findFirst({
+      where: { telegramUsername: { equals: invite.telegramUsername, mode: "insensitive" } },
+    });
+
+    if (!user) {
+      // Create a new user account for this invited person
+      user = await prisma.user.create({
+        data: {
+          telegramUsername: invite.telegramUsername,
+          isVerified: false,
+          preferredLocale: DEFAULT_LOCALE,
+        },
+      });
+    }
+
+    // Link Telegram chat
+    await prisma.$transaction([
+      prisma.telegramLink.deleteMany({
+        where: { OR: [{ userId: user.id }, { chatId }] },
+      }),
+      prisma.telegramLink.create({
+        data: {
+          userId: user.id,
+          chatId,
+          username: tgUser?.username ?? null,
+          firstName: tgUser?.first_name ?? null,
+          lastName: tgUser?.last_name ?? null,
+        },
+      }),
+    ]);
+
+    // Add to group if not already a member
+    const existingMember = await prisma.roommateGroupMember.findUnique({
+      where: { groupId_userId: { groupId: invite.groupId, userId: user.id } },
+    });
+
+    if (!existingMember) {
+      await prisma.$transaction([
+        prisma.roommateGroupMember.create({
+          data: {
+            groupId: invite.groupId,
+            userId: user.id,
+            role: "member",
+          },
+        }),
+        prisma.roommateInvite.update({
+          where: { id: invite.id },
+          data: {
+            status: "accepted",
+            acceptedUserId: user.id,
+            respondedAt: new Date(),
+          },
+        }),
+        prisma.roommateActivityLog.create({
+          data: {
+            groupId: invite.groupId,
+            kind: "member_joined",
+            payload: JSON.stringify({
+              userId: user.id,
+              telegramUsername: invite.telegramUsername,
+              inviteId: invite.id,
+            }),
+          },
+        }),
+      ]);
+    } else {
+      // Already a member, just mark invite as accepted
+      await prisma.roommateInvite.update({
+        where: { id: invite.id },
+        data: {
+          status: "accepted",
+          acceptedUserId: user.id,
+          respondedAt: new Date(),
+        },
+      });
+    }
+
+    const t = tForLocale(DEFAULT_LOCALE);
+    const groupUrl = buildAppUrl(`/roommate/${invite.groupId}`);
+    await sendTelegramMessage(
+      chatId,
+      `🏠 Welcome! You've joined the roommate group "${invite.group.name}".\n\n${groupUrl ? `Open the group:` : ""}`,
+      groupUrl
+        ? { reply_markup: inlineKeyboard([[urlButton("Open Group", groupUrl)]]) }
+        : undefined
+    );
+
+    // Set up the standard keyboard too
+    await setChatMenuButton({ type: "default" });
+    const keyboard = replyKeyboard([
+      [textButton("📊 Dashboard"), textButton("📝 Transactions")],
+      [textButton("➕ Add")],
+      [textButton("❓ Help"), textButton("🌐 Language")],
+    ]);
+    await sendTelegramMessage(
+      chatId,
+      `${t("bot.linkedVerified")}`,
+      { reply_markup: keyboard }
+    );
+    return;
+  }
+
+  // /start <token>  → account linking (original flow)
   const user = await prisma.user.findUnique({ where: { linkToken } });
 
   if (!user) {
