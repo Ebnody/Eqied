@@ -92,7 +92,7 @@ export default function LoginPage() {
           </div>
 
           {error && (
-            <div className="rounded-md bg-red-50 border border-red-200 text-red-700 text-sm px-3 py-2">
+            <div className="rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-sm px-3 py-2">
               {error}
             </div>
           )}
@@ -110,16 +110,16 @@ export default function LoginPage() {
           <p className="text-center">
             <Link
               href="/forgot-password"
-              className="text-xs text-emerald-700 hover:underline"
+              className="text-xs text-emerald-400 hover:text-emerald-300 transition-colors"
             >
               {t("auth.forgotPassword")}
             </Link>
           </p>
         </form>
 
-        <p className="mt-4 text-sm text-slate-600 text-center">
+        <p className="mt-4 text-sm text-slate-400 text-center">
           {t("auth.noAccount")}{" "}
-          <Link href="/signup" className="text-emerald-700 hover:underline">
+          <Link href="/signup" className="text-emerald-400 hover:text-emerald-300 transition-colors">
             {t("auth.signup")}
           </Link>
         </p>

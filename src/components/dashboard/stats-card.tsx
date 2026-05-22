@@ -15,21 +15,58 @@ export function StatsCard({
   icon,
   tone = "default",
 }: StatsCardProps) {
-  const toneClass = {
-    default: "bg-white",
-    income: "bg-emerald-50 border-emerald-200",
-    expense: "bg-rose-50 border-rose-200",
-    warning: "bg-amber-50 border-amber-200",
+  const toneClasses = {
+    default: {
+      border: "border-white/10",
+      iconBg: "bg-white/5",
+      text: "text-slate-300",
+      value: "text-white",
+      hint: "text-slate-500",
+    },
+    income: {
+      border: "border-emerald-500/20",
+      iconBg: "bg-emerald-500/15",
+      text: "text-emerald-300",
+      value: "text-white",
+      hint: "text-emerald-400/60",
+    },
+    expense: {
+      border: "border-rose-500/20",
+      iconBg: "bg-rose-500/15",
+      text: "text-rose-300",
+      value: "text-white",
+      hint: "text-rose-400/60",
+    },
+    warning: {
+      border: "border-amber-500/20",
+      iconBg: "bg-amber-500/15",
+      text: "text-amber-300",
+      value: "text-white",
+      hint: "text-amber-400/60",
+    },
   }[tone];
 
   return (
-    <div className={cn("rounded-xl border p-5 shadow-sm", toneClass)}>
-      <div className="flex items-center justify-between text-slate-600 text-sm">
-        <span>{label}</span>
-        {icon}
+    <div
+      className={cn(
+        "glass rounded-2xl p-5 transition-transform hover:scale-[1.02] duration-200",
+        toneClasses.border
+      )}
+    >
+      <div className="flex items-center justify-between text-sm">
+        <span className={toneClasses.text}>{label}</span>
+        {icon && (
+          <div className={cn("p-1.5 rounded-lg", toneClasses.iconBg)}>
+            {icon}
+          </div>
+        )}
       </div>
-      <div className="mt-2 text-2xl font-semibold text-slate-900">{value}</div>
-      {hint && <div className="mt-1 text-xs text-slate-500">{hint}</div>}
+      <div className={cn("mt-2 text-2xl font-semibold", toneClasses.value)}>
+        {value}
+      </div>
+      {hint && (
+        <div className={cn("mt-1 text-xs", toneClasses.hint)}>{hint}</div>
+      )}
     </div>
   );
 }

@@ -137,7 +137,7 @@ export default function SignupPage() {
           </div>
 
           {error && (
-            <div className="rounded-md bg-red-50 border border-red-200 text-red-700 text-sm px-3 py-2">
+            <div className="rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-sm px-3 py-2">
               {error}
             </div>
           )}
@@ -153,9 +153,9 @@ export default function SignupPage() {
           </Button>
         </form>
 
-        <p className="mt-4 text-sm text-slate-600 text-center">
+        <p className="mt-4 text-sm text-slate-400 text-center">
           {t("auth.haveAccount")}{" "}
-          <Link href="/login" className="text-emerald-700 hover:underline">
+          <Link href="/login" className="text-emerald-400 hover:text-emerald-300 transition-colors">
             {t("auth.login")}
           </Link>
         </p>

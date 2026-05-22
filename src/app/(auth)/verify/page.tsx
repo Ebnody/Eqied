@@ -130,16 +130,16 @@ export default function VerifyPage() {
       <CardContent className="space-y-6">
         {/* Step 1 */}
         <div
-          className={`rounded-lg border p-4 ${
-            linked ? "border-emerald-200 bg-emerald-50" : "border-slate-200"
+          className={`rounded-xl border p-4 ${
+            linked ? "border-emerald-500/20 bg-emerald-500/10" : "border-white/10 bg-white/5"
           }`}
         >
           <div className="flex items-center gap-2 mb-2">
             <span
               className={`h-6 w-6 flex items-center justify-center rounded-full text-xs font-semibold ${
                 linked
-                  ? "bg-emerald-600 text-white"
-                  : "bg-slate-200 text-slate-700"
+                  ? "gradient-income text-white"
+                  : "bg-white/10 text-slate-400"
               }`}
             >
               {linked ? <CheckCircle2 className="h-4 w-4" /> : "1"}
@@ -149,7 +149,7 @@ export default function VerifyPage() {
 
           {!linked && (
             <>
-              <p className="text-sm text-slate-600 mb-3">{t("auth.linkBotHint")}</p>
+              <p className="text-sm text-slate-400 mb-3">{t("auth.linkBotHint")}</p>
               {deepLink ? (
                 <Button asChild className="w-full">
                   <a href={deepLink} target="_blank" rel="noopener noreferrer">
@@ -177,20 +177,20 @@ export default function VerifyPage() {
           )}
 
           {linked && (
-            <p className="text-sm text-emerald-700">{t("auth.linkedSuccess")}</p>
+            <p className="text-sm text-emerald-300">{t("auth.linkedSuccess")}</p>
           )}
         </div>
 
         {/* Step 2 */}
         <div
-          className={`rounded-lg border p-4 ${
+          className={`rounded-xl border p-4 ${
             !linked
-              ? "opacity-50 border-slate-200"
-              : "border-slate-200"
+              ? "opacity-50 border-white/10 bg-white/5"
+              : "border-white/10 bg-white/5"
           }`}
         >
           <div className="flex items-center gap-2 mb-2">
-            <span className="h-6 w-6 flex items-center justify-center rounded-full text-xs font-semibold bg-slate-200 text-slate-700">
+            <span className="h-6 w-6 flex items-center justify-center rounded-full text-xs font-semibold bg-white/10 text-slate-400">
               2
             </span>
             <span className="font-medium">{t("auth.stepOtp")}</span>
@@ -247,7 +247,7 @@ export default function VerifyPage() {
                 type="button"
                 onClick={sendOtp}
                 disabled={sending}
-                className="text-xs text-emerald-700 hover:underline w-full"
+                className="text-xs text-emerald-400 hover:text-emerald-300 transition-colors w-full"
               >
                 {t("auth.resend")}
               </button>
@@ -256,7 +256,7 @@ export default function VerifyPage() {
         </div>
 
         {error && (
-          <div className="rounded-md bg-red-50 border border-red-200 text-red-700 text-sm px-3 py-2">
+          <div className="rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-sm px-3 py-2">
             {error}
           </div>
         )}

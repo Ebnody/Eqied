@@ -41,7 +41,7 @@ export function LocaleSwitcher({
         type="button"
         onClick={() => setOpen((v) => !v)}
         disabled={pending}
-        className={`inline-flex items-center gap-2 rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors ${
+        className={`inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-200 hover:bg-white/10 transition-colors ${
           variant === "compact" ? "w-auto" : "w-full justify-between"
         } disabled:opacity-50`}
         aria-label={t("common.selectLanguage")}
@@ -61,7 +61,7 @@ export function LocaleSwitcher({
             onClick={() => setOpen(false)}
             aria-hidden
           />
-          <div className="absolute right-0 z-20 mt-1 w-48 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-lg">
+          <div className="absolute right-0 z-20 mt-1 w-48 overflow-hidden rounded-xl border border-white/10 bg-[#131826] shadow-lg">
             <ul role="listbox" className="py-1">
               {LOCALES.map((code) => {
                 const label = LOCALE_LABELS[code];
@@ -73,8 +73,8 @@ export function LocaleSwitcher({
                       role="option"
                       aria-selected={isCurrent}
                       onClick={() => selectLocale(code)}
-                      className={`w-full flex items-center justify-between gap-2 px-3 py-2 text-sm text-left hover:bg-slate-50 ${
-                        isCurrent ? "bg-emerald-50 text-emerald-900" : "text-slate-700"
+                      className={`w-full flex items-center justify-between gap-2 px-3 py-2 text-sm text-left hover:bg-white/5 transition-colors ${
+                        isCurrent ? "bg-emerald-500/10 text-emerald-300" : "text-slate-200"
                       }`}
                     >
                       <span>
@@ -86,7 +86,7 @@ export function LocaleSwitcher({
                         )}
                       </span>
                       {isCurrent && (
-                        <Check className="h-4 w-4 text-emerald-600" />
+                        <Check className="h-4 w-4 text-emerald-400" />
                       )}
                     </button>
                   </li>

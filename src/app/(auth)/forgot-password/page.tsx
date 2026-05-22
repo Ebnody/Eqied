@@ -146,12 +146,12 @@ export default function ForgotPasswordPage() {
             </div>
 
             {error && (
-              <div className="rounded-md bg-red-50 border border-red-200 text-red-700 text-sm px-3 py-2">
+              <div className="rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-sm px-3 py-2">
                 {error}
               </div>
             )}
             {info && (
-              <div className="rounded-md bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm px-3 py-2">
+              <div className="rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-sm px-3 py-2">
                 {info}
               </div>
             )}
@@ -171,7 +171,7 @@ export default function ForgotPasswordPage() {
         ) : (
           <form onSubmit={resetPassword} className="space-y-4">
             {info && (
-              <div className="rounded-md bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm px-3 py-2 flex items-start gap-2">
+              <div className="rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-sm px-3 py-2 flex items-start gap-2">
                 <CheckCircle2 className="h-4 w-4 mt-0.5 shrink-0" />
                 <span>{info}</span>
               </div>
@@ -217,7 +217,7 @@ export default function ForgotPasswordPage() {
             </div>
 
             {error && (
-              <div className="rounded-md bg-red-50 border border-red-200 text-red-700 text-sm px-3 py-2">
+              <div className="rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-sm px-3 py-2">
                 {error}
               </div>
             )}
@@ -245,16 +245,16 @@ export default function ForgotPasswordPage() {
                 setError(null);
                 setInfo(null);
               }}
-              className="text-xs text-emerald-700 hover:underline w-full"
+              className="text-xs text-emerald-400 hover:text-emerald-300 transition-colors w-full"
             >
               Use a different account
             </button>
           </form>
         )}
 
-        <p className="mt-4 text-sm text-slate-600 text-center">
+        <p className="mt-4 text-sm text-slate-400 text-center">
           Remembered it?{" "}
-          <Link href="/login" className="text-emerald-700 hover:underline">
+          <Link href="/login" className="text-emerald-400 hover:text-emerald-300 transition-colors">
             Back to login
           </Link>
         </p>

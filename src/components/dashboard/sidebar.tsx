@@ -46,29 +46,29 @@ export function Sidebar({ fullName }: { fullName?: string | null }) {
   return (
     <>
       {/* Mobile top bar */}
-      <div className="md:hidden flex items-center justify-between border-b bg-white px-4 py-3 sticky top-0 z-10">
-        <Link href="/dashboard" className="flex items-center gap-2 font-semibold text-emerald-700">
-          <Wallet className="h-5 w-5" />
+      <div className="md:hidden flex items-center justify-between border-b border-white/10 glass px-4 py-3 sticky top-0 z-10">
+        <Link href="/dashboard" className="flex items-center gap-2 font-semibold gradient-text">
+          <Wallet className="h-5 w-5 text-emerald-400" />
           EthioBudget
         </Link>
         <button
           onClick={() => setOpen(!open)}
-          className="p-2 rounded-md hover:bg-slate-100"
+          className="p-2 rounded-xl hover:bg-white/10 transition-colors"
           aria-label="Toggle menu"
         >
-          {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          {open ? <X className="h-5 w-5 text-slate-300" /> : <Menu className="h-5 w-5 text-slate-300" />}
         </button>
       </div>
 
       <aside
         className={cn(
-          "md:w-64 md:border-r md:bg-white md:flex md:flex-col md:sticky md:top-0 md:h-screen",
-          "fixed inset-x-0 top-[57px] bottom-0 bg-white z-20 border-t",
+          "md:w-64 md:border-r md:border-white/10 md:glass md:flex md:flex-col md:sticky md:top-0 md:h-screen",
+          "fixed inset-x-0 top-[57px] bottom-0 glass z-20 border-t border-white/10",
           open ? "flex flex-col" : "hidden md:flex"
         )}
       >
-        <div className="hidden md:flex items-center gap-2 px-6 py-5 border-b font-semibold text-emerald-700">
-          <Wallet className="h-5 w-5" />
+        <div className="hidden md:flex items-center gap-2 px-6 py-5 border-b border-white/10 font-semibold gradient-text">
+          <Wallet className="h-5 w-5 text-emerald-400" />
           EthioBudget
         </div>
 
@@ -83,10 +83,10 @@ export function Sidebar({ fullName }: { fullName?: string | null }) {
                 href={item.href}
                 onClick={() => setOpen(false)}
                 className={cn(
-                  "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
+                  "flex items-center gap-3 rounded-xl px-3 py-2 text-sm transition-all",
                   active
-                    ? "bg-emerald-100 text-emerald-800 font-medium"
-                    : "text-slate-700 hover:bg-slate-100"
+                    ? "bg-emerald-500/15 text-emerald-300 font-medium border border-emerald-500/20"
+                    : "text-slate-400 hover:bg-white/5 hover:text-slate-200"
                 )}
               >
                 <Icon className="h-4 w-4" />
@@ -96,7 +96,7 @@ export function Sidebar({ fullName }: { fullName?: string | null }) {
           })}
         </nav>
 
-        <div className="border-t px-3 py-3 space-y-2">
+        <div className="border-t border-white/10 px-3 py-3 space-y-2">
           {fullName && (
             <div className="px-3 py-1 text-xs text-slate-500 truncate">
               {fullName}
@@ -107,7 +107,7 @@ export function Sidebar({ fullName }: { fullName?: string | null }) {
           </div>
           <button
             onClick={logout}
-            className="w-full flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-100"
+            className="w-full flex items-center gap-3 rounded-xl px-3 py-2 text-sm text-slate-400 hover:bg-white/5 hover:text-slate-200 transition-all"
           >
             <LogOut className="h-4 w-4" />
             {t("nav.logout")}
