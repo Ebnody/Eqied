@@ -12,6 +12,7 @@ import {
   X,
 } from "lucide-react";
 import { downloadCsv, toCsv } from "@/lib/csv";
+import Link from "next/link";
 
 export interface TxRow {
   id: string;
@@ -297,7 +298,12 @@ export function TransactionsTable({ transactions }: Props) {
                 {filtered.map((tx) => (
                   <tr key={tx.id} className="transition-colors hover:bg-[var(--glass-bg)]">
                     <td className="px-6 py-4 text-sm font-mono text-[var(--muted-foreground)]">
-                      {tx.id.slice(0, 10)}
+                      <Link
+                        href={`/admin/transactions/${tx.id}`}
+                        className="hover:text-emerald-400 transition-colors"
+                      >
+                        {tx.id.slice(0, 10)}…
+                      </Link>
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
