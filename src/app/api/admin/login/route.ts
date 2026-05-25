@@ -69,6 +69,13 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  if (user.disabledAt) {
+    return NextResponse.json(
+      { error: "This admin account has been suspended." },
+      { status: 403 }
+    );
+  }
+
   if (!user.isVerified) {
     return NextResponse.json(
       { error: "Account not verified" },

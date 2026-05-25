@@ -37,6 +37,8 @@ model User {
   linkToken           String?  @unique
   linkTokenExpiresAt  DateTime?
   preferredLocale     String   @default("en") // "en" | "am" | "om" | "ti"
+  disabledAt          DateTime?
+  disabledReason      String?
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
 
@@ -230,6 +232,7 @@ model RoommateGroup {
   passwordHash  String   // single shared password for group-session login
   createdById   String
   createdBy     User     @relation("RoommateGroupOwner", fields: [createdById], references: [id], onDelete: Restrict)
+  archivedAt    DateTime?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 

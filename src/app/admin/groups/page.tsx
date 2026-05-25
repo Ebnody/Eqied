@@ -1,7 +1,9 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Search, UsersRound, MoreHorizontal } from "lucide-react";
+import { Search, UsersRound } from "lucide-react";
 import { prisma } from "@/lib/prisma";
+import { requireAdmin } from "@/lib/auth";
+import { GroupRowActions } from "@/components/admin/group-row-actions";
 
 export const dynamic = "force-dynamic";
 
@@ -35,12 +37,14 @@ async function getGroups() {
       g.createdBy.email ||
       g.createdBy.phone ||
       "Unknown",
-    status: "active",
+    status: g.archivedAt ? "archived" : "active",
   }));
 }
 
 export default async function AdminGroupsPage() {
+  const admin = await requireAdmin();
   const GROUPS = await getGroups();
+  const isSuperAdmin = admin.role === "SUPER_ADMIN";
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -144,9 +148,12 @@ export default async function AdminGroupsPage() {
                       </Badge>
                     </td>
                     <td className="px-6 py-4">
-                      <button className="text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors">
-                        <MoreHorizontal className="h-4 w-4" />
-                      </button>
+                      <GroupRowActions
+                        groupId={g.id}
+                        groupName={g.name}
+                        isArchived={g.status === "archived"}
+                        isSuperAdmin={isSuperAdmin}
+                      />
                     </td>
                   </tr>
                 ))}

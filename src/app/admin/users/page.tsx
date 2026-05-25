@@ -1,7 +1,9 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Search, Filter, MoreHorizontal, Mail, Phone } from "lucide-react";
+import { Search, Filter, Mail, Phone } from "lucide-react";
 import { prisma } from "@/lib/prisma";
+import { requireAdmin } from "@/lib/auth";
+import { UserRowActions } from "@/components/admin/user-row-actions";
 
 export const dynamic = "force-dynamic";
 
@@ -16,6 +18,7 @@ async function getUsers() {
       email: true,
       phone: true,
       isVerified: true,
+      disabledAt: true,
       createdAt: true,
       _count: { select: { transactions: true } },
     },
@@ -25,7 +28,11 @@ async function getUsers() {
     name: u.fullName || u.email || u.phone || "Unnamed",
     email: u.email || "—",
     phone: u.phone || "—",
-    status: u.isVerified ? "active" : "pending",
+    status: u.disabledAt
+      ? "suspended"
+      : u.isVerified
+      ? "active"
+      : "pending",
     joined: u.createdAt.toLocaleDateString("en-US", {
       month: "short",
       day: "2-digit",
@@ -36,7 +43,9 @@ async function getUsers() {
 }
 
 export default async function AdminUsersPage() {
+  const admin = await requireAdmin();
   const USERS = await getUsers();
+  const isSuperAdmin = admin.role === "SUPER_ADMIN";
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -133,8 +142,8 @@ export default async function AdminUsersPage() {
                         className={
                           user.status === "active"
                             ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-400"
-                            : user.status === "inactive"
-                            ? "border-[var(--glass-border)] bg-[var(--glass-bg)] text-[var(--muted)]"
+                            : user.status === "suspended"
+                            ? "border-rose-500/20 bg-rose-500/10 text-rose-400"
                             : "border-amber-500/20 bg-amber-500/10 text-amber-400"
                         }
                       >
@@ -148,9 +157,13 @@ export default async function AdminUsersPage() {
                       {user.transactions}
                     </td>
                     <td className="px-6 py-4">
-                      <button className="text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors">
-                        <MoreHorizontal className="h-4 w-4" />
-                      </button>
+                      <UserRowActions
+                        userId={user.id}
+                        userName={user.name}
+                        isSuspended={user.status === "suspended"}
+                        isCurrentUser={user.id === admin.id}
+                        isSuperAdmin={isSuperAdmin}
+                      />
                     </td>
                   </tr>
                 ))}

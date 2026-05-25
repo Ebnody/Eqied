@@ -68,6 +68,17 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  if (user.disabledAt) {
+    return NextResponse.json(
+      {
+        error:
+          "Your account has been suspended. Please contact support.",
+        code: "account_suspended",
+      },
+      { status: 403 }
+    );
+  }
+
   if (!user.isVerified) {
     return NextResponse.json(
       {

@@ -1,1 +1,10 @@
-feat(admin): make dashboard stat cards clickable and wire View All button to transactions page (Phase 1)
+feat(admin): suspend/delete users and archive/delete groups with audit logging (Phase 2)
+
+- Add disabledAt + disabledReason to User model
+- Add archivedAt to RoommateGroup model
+- Block suspended users from logging in (user + admin auth)
+- New API: PATCH/DELETE /api/admin/users/[id] (suspend/unsuspend; super admin can hard-delete)
+- New API: PATCH/DELETE /api/admin/groups/[id] (archive/unarchive; super admin can hard-delete)
+- Working dropdown action menu on /admin/users and /admin/groups rows
+- Confirmation modal for destructive deletes
+- All actions logged to AdminLog
