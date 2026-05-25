@@ -61,6 +61,13 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  if (user.role === "ADMIN" || user.role === "SUPER_ADMIN") {
+    return NextResponse.json(
+      { error: "Admin accounts must use the admin login." },
+      { status: 403 }
+    );
+  }
+
   if (!user.isVerified) {
     return NextResponse.json(
       {
@@ -73,7 +80,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const token = await createSessionToken(user.id);
+  const token = await createSessionToken(user.id, user.role);
   await setSessionCookie(token);
 
   return NextResponse.json({ ok: true, token });

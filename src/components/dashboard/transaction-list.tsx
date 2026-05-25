@@ -34,11 +34,11 @@ export function TransactionList({
 
   if (transactions.length === 0) {
     return (
-      <p className="text-sm text-slate-500 text-center py-8">{fallbackEmpty}</p>
+      <p className="text-sm text-[var(--muted-foreground)] text-center py-8">{fallbackEmpty}</p>
     );
   }
   return (
-    <ul className="divide-y">
+    <ul className="divide-y divide-[var(--glass-border)]">
       {transactions.map((txn) => (
         <li
           key={txn.id}
@@ -49,12 +49,12 @@ export function TransactionList({
               {getCategoryEmoji(txn.categoryKey)}
             </span>
             <div className="min-w-0">
-              <p className="text-sm font-medium text-slate-900 truncate">
+              <p className="text-sm font-medium text-[var(--foreground)] truncate">
                 {txn.categoryKey
                   ? getCategoryName(txn.categoryKey)
                   : txn.counterparty || t("dashboard.uncategorized")}
               </p>
-              <div className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-xs text-slate-500">
+              <div className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-xs text-[var(--muted-foreground)]">
                 <span>
                   {new Date(txn.occurredAt).toLocaleDateString(dateLocale, {
                     year: "numeric",
@@ -63,20 +63,20 @@ export function TransactionList({
                   })}
                 </span>
                 {txn.counterparty && (
-                  <span className="text-slate-600">
+                  <span className="text-[var(--muted)]">
                     · {txn.counterparty}
                   </span>
                 )}
                 {txn.provider && (
-                  <Badge variant="outline" className="text-[10px] px-1 py-0 h-4">
+                  <Badge variant="outline" className="text-[10px] px-1 py-0 h-4 border-[var(--glass-border)] bg-[var(--glass-bg)] text-[var(--muted)]">
                     {txn.provider}
                   </Badge>
                 )}
                 {txn.reference && (
-                  <span className="text-slate-400">Ref: {txn.reference}</span>
+                  <span className="text-[var(--muted-foreground)]">Ref: {txn.reference}</span>
                 )}
                 {txn.source === "telegram" && (
-                  <Badge variant="secondary" className="text-[10px] px-1 py-0 h-4">telegram</Badge>
+                  <Badge variant="secondary" className="text-[10px] px-1 py-0 h-4 bg-[var(--glass-bg)] text-[var(--muted)] border-0">telegram</Badge>
                 )}
                 {txn.status === "uncategorized" && (
                   <Badge variant="warning" className="text-[10px] px-1 py-0 h-4">{t("dashboard.uncategorized")}</Badge>
@@ -87,8 +87,8 @@ export function TransactionList({
           <span
             className={
               txn.type === "income"
-                ? "text-sm font-semibold text-emerald-700 whitespace-nowrap"
-                : "text-sm font-semibold text-rose-700 whitespace-nowrap"
+                ? "text-sm font-semibold text-emerald-400 whitespace-nowrap"
+                : "text-sm font-semibold text-rose-400 whitespace-nowrap"
             }
           >
             {txn.type === "income" ? "+" : "-"}

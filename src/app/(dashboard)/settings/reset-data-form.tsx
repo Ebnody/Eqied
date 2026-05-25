@@ -62,12 +62,12 @@ export function ResetDataForm() {
       deleted.notifications +
       deleted.otpCodes;
     return (
-      <div className="rounded-md bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm p-4 space-y-2">
+      <div className="rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-sm p-4 space-y-2">
         <div className="flex items-center gap-2 font-medium">
           <CheckCircle2 className="h-4 w-4" />
           Reset complete — {total} record{total === 1 ? "" : "s"} removed.
         </div>
-        <ul className="text-xs list-disc list-inside space-y-0.5">
+        <ul className="text-xs list-disc list-inside space-y-0.5 text-slate-400">
           <li>Transactions: {deleted.transactions}</li>
           <li>Forwarded SMS: {deleted.forwardedSms}</li>
           <li>Budgets: {deleted.budgets}</li>
@@ -81,7 +81,7 @@ export function ResetDataForm() {
             setDeleted(null);
             setOpen(false);
           }}
-          className="text-xs text-emerald-700 hover:underline"
+          className="text-xs text-emerald-400 hover:text-emerald-300 transition-colors"
         >
           Done
         </button>
@@ -94,7 +94,7 @@ export function ResetDataForm() {
       <Button
         variant="outline"
         onClick={() => setOpen(true)}
-        className="text-rose-700 border-rose-300 hover:bg-rose-50 hover:text-rose-800"
+        className="text-rose-300 border-rose-500/30 hover:bg-rose-500/10 hover:text-rose-200"
       >
         <AlertTriangle className="h-4 w-4" />
         Reset all my data
@@ -104,15 +104,15 @@ export function ResetDataForm() {
 
   return (
     <form onSubmit={onSubmit} className="space-y-3">
-      <div className="rounded-md bg-rose-50 border border-rose-200 text-rose-800 text-sm p-3 space-y-2">
+      <div className="rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-sm p-3 space-y-2">
         <div className="flex items-center gap-2 font-semibold">
           <AlertTriangle className="h-4 w-4" />
           This cannot be undone
         </div>
-        <p className="text-xs">
+        <p className="text-xs text-slate-400">
           The following will be permanently deleted from your account:
         </p>
-        <ul className="text-xs list-disc list-inside space-y-0.5">
+        <ul className="text-xs list-disc list-inside space-y-0.5 text-slate-400">
           <li>All transactions</li>
           <li>All forwarded SMS records</li>
           <li>All monthly budgets and category plans</li>
@@ -120,7 +120,7 @@ export function ResetDataForm() {
           <li>All notifications</li>
           <li>Any pending OTP codes</li>
         </ul>
-        <p className="text-xs">
+        <p className="text-xs text-slate-400">
           Your account, password, language, and Telegram link will stay intact.
         </p>
       </div>
@@ -139,7 +139,7 @@ export function ResetDataForm() {
       </div>
 
       {error && (
-        <div className="rounded-md bg-red-50 border border-red-200 text-red-700 text-sm px-3 py-2">
+        <div className="rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-sm px-3 py-2">
           {error}
         </div>
       )}

@@ -17,31 +17,31 @@ export function StatsCard({
 }: StatsCardProps) {
   const toneClasses = {
     default: {
-      border: "border-white/10",
-      iconBg: "bg-white/5",
-      text: "text-slate-300",
-      value: "text-white",
-      hint: "text-slate-500",
+      border: "border-[var(--glass-border)]",
+      iconBg: "bg-[var(--glass-bg)]",
+      text: "text-[var(--muted)]",
+      value: "text-[var(--foreground)]",
+      hint: "text-[var(--muted-foreground)]",
     },
     income: {
       border: "border-emerald-500/20",
       iconBg: "bg-emerald-500/15",
       text: "text-emerald-300",
-      value: "text-white",
+      value: "text-[var(--foreground)]",
       hint: "text-emerald-400/60",
     },
     expense: {
       border: "border-rose-500/20",
       iconBg: "bg-rose-500/15",
       text: "text-rose-300",
-      value: "text-white",
+      value: "text-[var(--foreground)]",
       hint: "text-rose-400/60",
     },
     warning: {
       border: "border-amber-500/20",
       iconBg: "bg-amber-500/15",
       text: "text-amber-300",
-      value: "text-white",
+      value: "text-[var(--foreground)]",
       hint: "text-amber-400/60",
     },
   }[tone];

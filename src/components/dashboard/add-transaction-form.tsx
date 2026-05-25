@@ -2,13 +2,13 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -106,7 +106,11 @@ export function AddTransactionForm({ type }: Props) {
                 id="cat"
                 value={categoryKey}
                 onChange={(e) => setCategoryKey(e.target.value)}
-                className="flex h-10 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className={cn(
+                  "flex h-10 w-full rounded-xl border px-3 py-2 text-sm focus:outline-none focus:ring-2 transition-all",
+                  "bg-[var(--input-bg)] border-[var(--input-border)] text-[var(--input-text)]",
+                  "focus:ring-[var(--input-focus-ring)] focus:border-[var(--accent)]"
+                )}
               >
                 {cats.map((c) => (
                   <option key={c.key} value={c.key}>
@@ -123,7 +127,11 @@ export function AddTransactionForm({ type }: Props) {
                 id="pm"
                 value={paymentMethod}
                 onChange={(e) => setPaymentMethod(e.target.value)}
-                className="flex h-10 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className={cn(
+                  "flex h-10 w-full rounded-xl border px-3 py-2 text-sm focus:outline-none focus:ring-2 transition-all",
+                  "bg-[var(--input-bg)] border-[var(--input-border)] text-[var(--input-text)]",
+                  "focus:ring-[var(--input-focus-ring)] focus:border-[var(--accent)]"
+                )}
               >
                 {PAYMENT_METHODS.map((p) => (
                   <option key={p.key} value={p.key}>
@@ -165,7 +173,7 @@ export function AddTransactionForm({ type }: Props) {
               )}
             </Button>
             {message && (
-              <p className="text-xs text-slate-600">{message}</p>
+              <p className="text-xs text-[var(--muted)]">{message}</p>
             )}
           </div>
         </form>

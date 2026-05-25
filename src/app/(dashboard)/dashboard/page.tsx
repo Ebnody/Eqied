@@ -44,12 +44,12 @@ export default async function DashboardPage() {
     <div className="space-y-6">
       <div className="flex items-start justify-between flex-wrap gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-white">
+          <h1 className="text-2xl font-bold text-[var(--foreground)]">
             {user.fullName?.split(" ")[0]
               ? `👋 ${user.fullName.split(" ")[0]}`
               : t("dashboard.title")}
           </h1>
-          <p className="text-sm text-slate-400">
+          <p className="text-sm text-[var(--muted)]">
             {t("dashboard.overview")} — {monthLabel(monthKey)}
           </p>
         </div>
@@ -65,7 +65,7 @@ export default async function DashboardPage() {
                   <AlertCircle className="h-4 w-4 text-white" />
                 </div>
                 <div className="flex-1">
-                  <p className="font-medium text-slate-200">
+                  <p className="font-medium text-[var(--foreground)]">
                     {t("dashboard.setSalaryHint")}
                   </p>
                   <Button asChild className="mt-3 rounded-xl" size="sm">
@@ -85,12 +85,12 @@ export default async function DashboardPage() {
                   <Inbox className="h-4 w-4 text-white" />
                 </div>
                 <div>
-                  <p className="font-medium text-slate-200">
+                  <p className="font-medium text-[var(--foreground)]">
                     {summary.uncategorizedCount} — {t("dashboard.uncategorized")}
                   </p>
                 </div>
               </div>
-              <Button asChild size="sm" variant="outline" className="rounded-xl border-white/10 hover:bg-white/5">
+              <Button asChild size="sm" variant="outline" className="rounded-xl border-[var(--glass-border)] hover:bg-[var(--glass-bg)]">
                 <Link href="/transactions">{t("common.next")}</Link>
               </Button>
             </div>
@@ -104,7 +104,7 @@ export default async function DashboardPage() {
           label="Budget"
           value={formatETB(summary.totalSalary)}
           hint={summary.salary?.isReceived ? t("budget.received") : t("budget.notReceived")}
-          icon={<Wallet className="h-4 w-4 text-slate-300" />}
+          icon={<Wallet className="h-4 w-4 text-[var(--muted)]" />}
         />
         <StatsCard
           label={t("common.income")}
@@ -131,7 +131,7 @@ export default async function DashboardPage() {
         (c) => (summary.byCategory[c.key]?.income ?? 0) > 0
       ) && (
         <div className="space-y-3">
-          <h2 className="text-sm font-medium text-slate-400">Income by Source</h2>
+          <h2 className="text-sm font-medium text-[var(--muted)]">Income by Source</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {INCOME_CATEGORIES.map((cat) => {
               const amount = summary.byCategory[cat.key]?.income ?? 0;
@@ -153,17 +153,17 @@ export default async function DashboardPage() {
       {/* Bento Grid: Chart + Transactions */}
       <div className="grid lg:grid-cols-5 gap-6">
         {/* Chart — spans 3 cols on large screens */}
-        <div className="lg:col-span-3 glass rounded-2xl border border-white/10 p-5">
-          <h2 className="font-semibold text-slate-100 mb-4">
+        <div className="lg:col-span-3 glass rounded-2xl border border-[var(--glass-border)] p-5">
+          <h2 className="font-semibold text-[var(--foreground)] mb-4">
             {t("dashboard.spendingByCategory")}
           </h2>
           <SpendingChart data={categoryRows} />
         </div>
 
         {/* Recent Transactions — spans 2 cols on large screens */}
-        <div className="lg:col-span-2 glass rounded-2xl border border-white/10 p-5">
+        <div className="lg:col-span-2 glass rounded-2xl border border-[var(--glass-border)] p-5">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="font-semibold text-slate-100">
+            <h2 className="font-semibold text-[var(--foreground)]">
               {t("dashboard.recent")}
             </h2>
             <Link
@@ -174,7 +174,7 @@ export default async function DashboardPage() {
             </Link>
           </div>
           {recent.length === 0 ? (
-            <p className="text-sm text-slate-500 text-center py-8">
+            <p className="text-sm text-[var(--muted-foreground)] text-center py-8">
               {t("dashboard.noTransactions")}
             </p>
           ) : (
@@ -182,33 +182,33 @@ export default async function DashboardPage() {
               {recent.map((txn) => (
                 <li
                   key={txn.id}
-                  className="flex items-center justify-between gap-2 p-2 rounded-xl hover:bg-white/5 transition-colors"
+                  className="flex items-center justify-between gap-2 p-2 rounded-xl hover:bg-[var(--glass-bg)] transition-colors"
                 >
                   <div className="flex items-center gap-3 min-w-0">
                     <span className="text-xl" aria-hidden>
                       {getCategoryEmoji(txn.categoryKey)}
                     </span>
                     <div className="min-w-0">
-                      <p className="text-sm font-medium text-slate-200 truncate">
+                      <p className="text-sm font-medium text-[var(--foreground)] truncate">
                         {txn.categoryKey
                           ? getCategoryName(txn.categoryKey)
                           : txn.counterparty || t("dashboard.uncategorized")}
                       </p>
-                      <div className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-xs text-slate-500">
+                      <div className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-xs text-[var(--muted-foreground)]">
                         <span>{new Date(txn.occurredAt).toLocaleDateString()}</span>
                         {txn.counterparty && (
-                          <span className="text-slate-400">· {txn.counterparty}</span>
+                          <span className="text-[var(--muted)]">· {txn.counterparty}</span>
                         )}
                         {txn.provider && (
-                          <Badge variant="outline" className="text-[10px] px-1 py-0 h-4 border-white/10 bg-white/5 text-slate-400">
+                          <Badge variant="outline" className="text-[10px] px-1 py-0 h-4 border-[var(--glass-border)] bg-[var(--glass-bg)] text-[var(--muted)]">
                             {txn.provider}
                           </Badge>
                         )}
                         {txn.reference && (
-                          <span className="text-slate-500">Ref: {txn.reference}</span>
+                          <span className="text-[var(--muted-foreground)]">Ref: {txn.reference}</span>
                         )}
                         {txn.source === "telegram" && (
-                          <Badge variant="secondary" className="text-[10px] px-1 py-0 h-4 bg-white/10 text-slate-400 border-0">
+                          <Badge variant="secondary" className="text-[10px] px-1 py-0 h-4 bg-[var(--glass-bg)] text-[var(--muted)] border-0">
                             telegram
                           </Badge>
                         )}

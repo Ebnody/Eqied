@@ -81,24 +81,24 @@ export default function TgLoginPage() {
         src="https://telegram.org/js/telegram-web-app.js"
         strategy="beforeInteractive"
       />
-      <main className="min-h-screen flex items-center justify-center bg-gray-50 p-6">
-        <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-sm border border-gray-200 text-center">
+      <main className="min-h-screen flex items-center justify-center bg-[var(--background)] p-6">
+        <div className="w-full max-w-sm rounded-2xl bg-[var(--card)] p-6 shadow-sm border border-[var(--card-border)] text-center">
           {status === "loading" && (
             <>
               <div className="mx-auto mb-3 h-10 w-10 animate-spin rounded-full border-4 border-emerald-500 border-t-transparent" />
-              <p className="text-gray-700 font-medium">Signing you in...</p>
-              <p className="mt-1 text-sm text-gray-500">
+              <p className="text-[var(--foreground)] font-medium">Signing you in...</p>
+              <p className="mt-1 text-sm text-[var(--muted)]">
                 Connecting your Telegram account.
               </p>
             </>
           )}
           {status === "error" && (
             <>
-              <div className="mx-auto mb-3 h-10 w-10 flex items-center justify-center rounded-full bg-red-50 text-red-600 text-xl">
+              <div className="mx-auto mb-3 h-10 w-10 flex items-center justify-center rounded-full bg-[var(--danger)]/10 text-[var(--danger)] text-xl">
                 !
               </div>
-              <p className="text-gray-800 font-semibold">Sign-in failed</p>
-              <p className="mt-1 text-sm text-gray-600">{errorMsg}</p>
+              <p className="text-[var(--foreground)] font-semibold">Sign-in failed</p>
+              <p className="mt-1 text-sm text-[var(--muted)]">{errorMsg}</p>
             </>
           )}
         </div>

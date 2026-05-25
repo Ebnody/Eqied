@@ -47,7 +47,7 @@ export function CategoryBarChart({
   const filtered = data.filter((d) => d.expense > 0);
   if (filtered.length === 0) {
     return (
-      <p className="text-sm text-slate-500 text-center py-8">
+      <p className="text-sm text-slate-400 text-center py-8">
         No expenses yet this month.
       </p>
     );
@@ -62,13 +62,13 @@ export function CategoryBarChart({
   return (
     <ResponsiveContainer width="100%" height={Math.max(220, chartData.length * 40)}>
       <BarChart data={chartData} layout="vertical" margin={{ left: 10, right: 30 }}>
-        <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" horizontal={false} />
-        <XAxis type="number" tick={{ fontSize: 11, fill: "#64748b" }} />
+        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" horizontal={false} />
+        <XAxis type="number" tick={{ fontSize: 11, fill: "#94a3b8" }} />
         <YAxis
           dataKey="name"
           type="category"
           width={140}
-          tick={{ fontSize: 12, fill: "#334155" }}
+          tick={{ fontSize: 12, fill: "#e2e8f0" }}
         />
         <Tooltip formatter={fmtTooltip} />
         <Bar dataKey="value" radius={[0, 6, 6, 0]}>
@@ -95,7 +95,7 @@ export function DailyTrendChart({
   const allZero = chartData.every((d) => d.income === 0 && d.expense === 0);
   if (allZero) {
     return (
-      <p className="text-sm text-slate-500 text-center py-8">
+      <p className="text-sm text-slate-400 text-center py-8">
         No transactions this month yet.
       </p>
     );
@@ -114,9 +114,9 @@ export function DailyTrendChart({
             <stop offset="100%" stopColor="#ef4444" stopOpacity={0} />
           </linearGradient>
         </defs>
-        <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-        <XAxis dataKey="day" tick={{ fontSize: 11, fill: "#64748b" }} />
-        <YAxis tick={{ fontSize: 11, fill: "#64748b" }} />
+        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
+        <XAxis dataKey="day" tick={{ fontSize: 11, fill: "#94a3b8" }} />
+        <YAxis tick={{ fontSize: 11, fill: "#94a3b8" }} />
         <Tooltip formatter={fmtTooltip} />
         <Legend />
         <Area
@@ -153,7 +153,7 @@ export function MonthOverMonthChart({
   const allZero = chartData.every((d) => d.income === 0 && d.expense === 0);
   if (allZero) {
     return (
-      <p className="text-sm text-slate-500 text-center py-8">
+      <p className="text-sm text-slate-400 text-center py-8">
         Need at least one month of data.
       </p>
     );
@@ -162,9 +162,9 @@ export function MonthOverMonthChart({
   return (
     <ResponsiveContainer width="100%" height={260}>
       <BarChart data={chartData} margin={{ left: 0, right: 10, top: 10, bottom: 0 }}>
-        <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-        <XAxis dataKey="label" tick={{ fontSize: 12, fill: "#64748b" }} />
-        <YAxis tick={{ fontSize: 11, fill: "#64748b" }} />
+        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
+        <XAxis dataKey="label" tick={{ fontSize: 12, fill: "#94a3b8" }} />
+        <YAxis tick={{ fontSize: 11, fill: "#94a3b8" }} />
         <Tooltip formatter={fmtTooltip} />
         <Legend />
         <Bar dataKey="income" fill="#10b981" radius={[4, 4, 0, 0]} />
@@ -181,7 +181,7 @@ export function PlannedVsActualChart({
 }) {
   if (data.length === 0) {
     return (
-      <p className="text-sm text-slate-500 text-center py-8">
+      <p className="text-sm text-slate-400 text-center py-8">
         Set your salary to generate a budget plan.
       </p>
     );
@@ -196,17 +196,17 @@ export function PlannedVsActualChart({
   return (
     <ResponsiveContainer width="100%" height={Math.max(220, chartData.length * 36)}>
       <BarChart data={chartData} layout="vertical" margin={{ left: 10, right: 30 }}>
-        <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" horizontal={false} />
-        <XAxis type="number" tick={{ fontSize: 11, fill: "#64748b" }} />
+        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" horizontal={false} />
+        <XAxis type="number" tick={{ fontSize: 11, fill: "#94a3b8" }} />
         <YAxis
           dataKey="name"
           type="category"
           width={140}
-          tick={{ fontSize: 12, fill: "#334155" }}
+          tick={{ fontSize: 12, fill: "#e2e8f0" }}
         />
         <Tooltip formatter={fmtTooltip} />
         <Legend />
-        <Bar dataKey="planned" fill="#cbd5e1" radius={[0, 4, 4, 0]} />
+        <Bar dataKey="planned" fill="#64748b" radius={[0, 4, 4, 0]} />
         <Bar dataKey="actual" fill="#10b981" radius={[0, 4, 4, 0]} />
       </BarChart>
     </ResponsiveContainer>
@@ -226,9 +226,9 @@ export function NetTrendLineChart({
   return (
     <ResponsiveContainer width="100%" height={200}>
       <LineChart data={chartData} margin={{ left: 0, right: 10, top: 10, bottom: 0 }}>
-        <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-        <XAxis dataKey="label" tick={{ fontSize: 12, fill: "#64748b" }} />
-        <YAxis tick={{ fontSize: 11, fill: "#64748b" }} />
+        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
+        <XAxis dataKey="label" tick={{ fontSize: 12, fill: "#94a3b8" }} />
+        <YAxis tick={{ fontSize: 11, fill: "#94a3b8" }} />
         <Tooltip formatter={fmtTooltip} />
         <Line
           type="monotone"

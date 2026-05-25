@@ -18,12 +18,21 @@ datasource db {
 
 // =================== USERS & AUTH ===================
 
+enum Role {
+  USER
+  ADMIN
+  SUPER_ADMIN
+}
+
 model User {
   id                  String   @id @default(cuid())
   phone               String?  @unique
   telegramUsername    String?  @unique
+  email               String?  @unique
   passwordHash        String?
   isVerified          Boolean  @default(false)
+  role                Role     @default(USER)
+  mustChangePassword  Boolean  @default(false)
   fullName            String?
   linkToken           String?  @unique
   linkTokenExpiresAt  DateTime?
@@ -43,6 +52,7 @@ model User {
   roommateMemberships RoommateGroupMember[]
   roommateGroupsOwned RoommateGroup[]       @relation("RoommateGroupOwner")
   roommateInvitesSent RoommateInvite[]      @relation("RoommateInviteCreator")
+  adminLogs           AdminLog[]
 
   @@index([phone])
   @@index([telegramUsername])
@@ -373,4 +383,24 @@ model RoommateGroupSession {
 
   @@index([memberId])
   @@index([expiresAt])
+}
+
+// =================== ADMIN AUDIT LOGS ===================
+
+model AdminLog {
+  id          String   @id @default(cuid())
+  adminId     String
+  admin       User     @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  action      String   // e.g. "CREATE_ADMIN", "VIEW_LOGS", "UPDATE_SETTINGS"
+  resource    String?  // e.g. "User", "Transaction", "Budget"
+  resourceId  String?  // ID of the affected resource
+  details     String?  // JSON string with additional metadata
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime @default(now())
+
+  @@index([adminId])
+  @@index([action])
+  @@index([createdAt])
+  @@index([adminId, createdAt])
 }

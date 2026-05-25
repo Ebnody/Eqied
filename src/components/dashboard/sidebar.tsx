@@ -19,6 +19,7 @@ import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { useI18n } from "@/i18n/provider";
 import { LocaleSwitcher } from "@/components/locale-switcher";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export function Sidebar({ fullName }: { fullName?: string | null }) {
   const pathname = usePathname();
@@ -46,30 +47,37 @@ export function Sidebar({ fullName }: { fullName?: string | null }) {
   return (
     <>
       {/* Mobile top bar */}
-      <div className="md:hidden flex items-center justify-between border-b border-white/10 glass px-4 py-3 sticky top-0 z-10">
+      <div className="md:hidden flex items-center justify-between border-b border-[var(--sidebar-border)] glass px-4 py-3 sticky top-0 z-10">
         <Link href="/dashboard" className="flex items-center gap-2 font-semibold gradient-text">
-          <Wallet className="h-5 w-5 text-emerald-400" />
+          <Wallet className="h-5 w-5 text-[var(--accent)]" />
           EthioBudget
         </Link>
-        <button
-          onClick={() => setOpen(!open)}
-          className="p-2 rounded-xl hover:bg-white/10 transition-colors"
-          aria-label="Toggle menu"
-        >
-          {open ? <X className="h-5 w-5 text-slate-300" /> : <Menu className="h-5 w-5 text-slate-300" />}
-        </button>
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
+          <button
+            onClick={() => setOpen(!open)}
+            className="p-2 rounded-xl hover:bg-white/10 transition-colors"
+            aria-label="Toggle menu"
+          >
+            {open ? <X className="h-5 w-5 text-[var(--muted)]" /> : <Menu className="h-5 w-5 text-[var(--muted)]" />}
+          </button>
+        </div>
       </div>
 
       <aside
         className={cn(
-          "md:w-64 md:border-r md:border-white/10 md:glass md:flex md:flex-col md:sticky md:top-0 md:h-screen",
-          "fixed inset-x-0 top-[57px] bottom-0 glass z-20 border-t border-white/10",
+          "md:w-64 md:border-r md:border-[var(--sidebar-border)] md:flex md:flex-col md:sticky md:top-0 md:h-screen",
+          "fixed inset-x-0 top-[57px] bottom-0 z-20 border-t border-[var(--sidebar-border)]",
+          "bg-[var(--sidebar-bg)] backdrop-blur-xl",
           open ? "flex flex-col" : "hidden md:flex"
         )}
       >
-        <div className="hidden md:flex items-center gap-2 px-6 py-5 border-b border-white/10 font-semibold gradient-text">
-          <Wallet className="h-5 w-5 text-emerald-400" />
-          EthioBudget
+        <div className="hidden md:flex items-center justify-between px-6 py-5 border-b border-[var(--sidebar-border)]">
+          <div className="flex items-center gap-2 font-semibold gradient-text">
+            <Wallet className="h-5 w-5 text-[var(--accent)]" />
+            EthioBudget
+          </div>
+          <ThemeToggle />
         </div>
 
         <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
@@ -85,8 +93,8 @@ export function Sidebar({ fullName }: { fullName?: string | null }) {
                 className={cn(
                   "flex items-center gap-3 rounded-xl px-3 py-2 text-sm transition-all",
                   active
-                    ? "bg-emerald-500/15 text-emerald-300 font-medium border border-emerald-500/20"
-                    : "text-slate-400 hover:bg-white/5 hover:text-slate-200"
+                    ? "bg-[var(--accent)]/15 text-[var(--sidebar-text-active)] font-medium border border-[var(--accent)]/20"
+                    : "text-[var(--sidebar-text)] hover:bg-white/5 hover:text-[var(--foreground)]"
                 )}
               >
                 <Icon className="h-4 w-4" />
@@ -96,9 +104,9 @@ export function Sidebar({ fullName }: { fullName?: string | null }) {
           })}
         </nav>
 
-        <div className="border-t border-white/10 px-3 py-3 space-y-2">
+        <div className="border-t border-[var(--sidebar-border)] px-3 py-3 space-y-2">
           {fullName && (
-            <div className="px-3 py-1 text-xs text-slate-500 truncate">
+            <div className="px-3 py-1 text-xs text-[var(--muted-foreground)] truncate">
               {fullName}
             </div>
           )}
@@ -107,7 +115,7 @@ export function Sidebar({ fullName }: { fullName?: string | null }) {
           </div>
           <button
             onClick={logout}
-            className="w-full flex items-center gap-3 rounded-xl px-3 py-2 text-sm text-slate-400 hover:bg-white/5 hover:text-slate-200 transition-all"
+            className="w-full flex items-center gap-3 rounded-xl px-3 py-2 text-sm text-[var(--sidebar-text)] hover:bg-white/5 hover:text-[var(--foreground)] transition-all"
           >
             <LogOut className="h-4 w-4" />
             {t("nav.logout")}

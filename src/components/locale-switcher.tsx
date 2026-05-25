@@ -41,7 +41,7 @@ export function LocaleSwitcher({
         type="button"
         onClick={() => setOpen((v) => !v)}
         disabled={pending}
-        className={`inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-200 hover:bg-white/10 transition-colors ${
+        className={`inline-flex items-center gap-2 rounded-xl border border-[var(--input-border)] bg-[var(--input-bg)] px-3 py-2 text-sm text-[var(--foreground)] hover:bg-[var(--glass-strong-bg)] transition-colors ${
           variant === "compact" ? "w-auto" : "w-full justify-between"
         } disabled:opacity-50`}
         aria-label={t("common.selectLanguage")}
@@ -61,7 +61,7 @@ export function LocaleSwitcher({
             onClick={() => setOpen(false)}
             aria-hidden
           />
-          <div className="absolute right-0 z-20 mt-1 w-48 overflow-hidden rounded-xl border border-white/10 bg-[#131826] shadow-lg">
+          <div className="absolute right-0 z-20 mt-1 w-48 overflow-hidden rounded-xl border border-[var(--card-border)] bg-[var(--background)] shadow-lg">
             <ul role="listbox" className="py-1">
               {LOCALES.map((code) => {
                 const label = LOCALE_LABELS[code];

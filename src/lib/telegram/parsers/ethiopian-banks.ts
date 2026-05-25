@@ -122,7 +122,6 @@ export const ethiopianBanksParser: SmsParser = (text: string): ParsedSms | null 
   };
 
   // Determine transaction type
-  const lower = text.toLowerCase();
   if (/\b(?:credited|received|deposited|incoming|has been credited)\b/i.test(text)) {
     result.type = "income";
   } else if (/\b(?:debited|transferred|withdrawn|sent|paid|purchase|bought|outgoing|has been debited)\b/i.test(text)) {

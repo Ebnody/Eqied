@@ -77,17 +77,17 @@ export default function GroupDashboardPage() {
     <div className="space-y-8">
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <Card>
+        <Card className="border-white/10">
           <CardContent className="p-5">
-            <p className="text-xs text-slate-500 uppercase tracking-wide">
+            <p className="text-xs text-slate-400 uppercase tracking-wide">
               {t("roommate.page.totalSpending")}
             </p>
-            <p className="text-2xl font-bold text-slate-800 mt-1">{formatETB(total)}</p>
+            <p className="text-2xl font-bold text-white mt-1">{formatETB(total)}</p>
           </CardContent>
         </Card>
-        <Card className="sm:col-span-2">
+        <Card className="sm:col-span-2 border-white/10">
           <CardContent className="p-5">
-            <p className="text-xs text-slate-500 uppercase tracking-wide">
+            <p className="text-xs text-slate-400 uppercase tracking-wide">
               {t("roommate.page.balances")}
             </p>
             <div className="mt-2 flex flex-wrap gap-2">
@@ -104,7 +104,7 @@ export default function GroupDashboardPage() {
                 );
               })}
               {balances.length === 0 && (
-                <span className="text-sm text-slate-400">{t("roommate.page.settled")}</span>
+                <span className="text-sm text-slate-500">{t("roommate.page.settled")}</span>
               )}
             </div>
           </CardContent>
@@ -114,7 +114,7 @@ export default function GroupDashboardPage() {
       {/* Recent expenses */}
       <div>
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-lg font-semibold text-slate-800">
+          <h2 className="text-lg font-semibold text-slate-100">
             {t("roommate.page.recentActivity")}
           </h2>
           <Button asChild variant="ghost" size="sm">
@@ -125,29 +125,29 @@ export default function GroupDashboardPage() {
         </div>
 
         {expenses.length === 0 ? (
-          <Card>
-            <CardContent className="p-8 text-center text-slate-500 text-sm">
+          <Card className="border-white/10">
+            <CardContent className="p-8 text-center text-slate-400 text-sm">
               {t("roommate.page.noExpenses")}
             </CardContent>
           </Card>
         ) : (
-          <Card className="overflow-hidden">
+          <Card className="overflow-hidden border-white/10">
             {expenses.map((e) => (
               <div
                 key={e.id}
-                className="flex items-center justify-between px-4 py-3 border-b last:border-b-0 hover:bg-slate-50"
+                className="flex items-center justify-between px-4 py-3 border-b border-white/10 last:border-b-0 hover:bg-white/5 transition-colors"
               >
                 <div className="flex items-center gap-3 min-w-0">
                   <span className="text-lg shrink-0">{categoryEmoji[e.categoryKey] ?? "📦"}</span>
                   <div className="min-w-0">
-                    <p className="text-sm font-medium text-slate-800 truncate">{e.title}</p>
+                    <p className="text-sm font-medium text-slate-200 truncate">{e.title}</p>
                     <p className="text-xs text-slate-500">
                       {e.paidBy.user.fullName ?? e.paidBy.user.telegramUsername} ·{" "}
                       {new Date(e.occurredAt).toLocaleDateString()}
                     </p>
                   </div>
                 </div>
-                <span className="text-sm font-semibold text-slate-700 shrink-0 ml-3">
+                <span className="text-sm font-semibold text-slate-300 shrink-0 ml-3">
                   {formatETB(e.amount)}
                 </span>
               </div>

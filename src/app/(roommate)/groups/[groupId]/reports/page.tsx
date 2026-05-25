@@ -22,9 +22,9 @@ export default function GroupReportsPage() {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-lg font-semibold text-slate-800">{t("roommate.page.reports")}</h2>
+      <h2 className="text-lg font-semibold text-slate-100">{t("roommate.page.reports")}</h2>
 
-      <Card>
+      <Card className="border-white/10">
         <CardContent className="p-5 space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
@@ -44,7 +44,7 @@ export default function GroupReportsPage() {
             </a>
           </Button>
 
-          <p className="text-xs text-slate-500">{t("roommate.page.downloadCsv")} — {t("common.date")} {t("common.optional")}</p>
+          <p className="text-xs text-slate-400">{t("roommate.page.downloadCsv")} — {t("common.date")} {t("common.optional")}</p>
         </CardContent>
       </Card>
     </div>

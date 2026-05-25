@@ -41,11 +41,11 @@ export function BudgetPlanCard({
   }
 
   return (
-    <div className="rounded-xl border bg-white shadow-sm">
-      <div className="px-5 py-4 border-b flex items-center justify-between gap-3">
+    <div className="glass rounded-2xl border border-white/10 shadow-sm">
+      <div className="px-5 py-4 border-b border-white/10 flex items-center justify-between gap-3">
         <div>
-          <h2 className="font-semibold text-slate-900">Budget Plan</h2>
-          <p className="text-xs text-slate-500 mt-0.5">
+          <h2 className="font-semibold text-slate-100">Budget Plan</h2>
+          <p className="text-xs text-slate-400 mt-0.5">
             Total planned: {formatETB(totalPlanned)}
           </p>
         </div>
@@ -57,7 +57,7 @@ export function BudgetPlanCard({
           Edit Plan
         </Button>
       </div>
-      <ul className="divide-y">
+      <ul className="divide-y divide-white/10">
         {categories.map((c) => {
           const spent = summaryByCategory[c.categoryKey]?.expense ?? 0;
           const pct =
@@ -70,7 +70,7 @@ export function BudgetPlanCard({
               <div className="flex items-center justify-between gap-2 mb-1.5">
                 <div className="flex items-center gap-2 min-w-0">
                   <span aria-hidden>{getCategoryEmoji(c.categoryKey)}</span>
-                  <span className="font-medium text-slate-900 truncate">
+                  <span className="font-medium text-slate-200 truncate">
                     {c.name}
                   </span>
                   <span className="text-xs text-slate-500">
@@ -80,12 +80,12 @@ export function BudgetPlanCard({
                 <div className="text-sm whitespace-nowrap">
                   <span
                     className={
-                      over ? "text-rose-700 font-medium" : "text-slate-700"
+                      over ? "text-rose-400 font-medium" : "text-slate-300"
                     }
                   >
                     {formatETB(spent)}
                   </span>
-                  <span className="text-slate-400">
+                  <span className="text-slate-500">
                     {" / "}
                     {formatETB(c.plannedAmount)}
                   </span>

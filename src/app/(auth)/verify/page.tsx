@@ -131,7 +131,7 @@ export default function VerifyPage() {
         {/* Step 1 */}
         <div
           className={`rounded-xl border p-4 ${
-            linked ? "border-emerald-500/20 bg-emerald-500/10" : "border-white/10 bg-white/5"
+            linked ? "border-emerald-500/20 bg-emerald-500/10" : "border-[var(--glass-border)] bg-[var(--glass-bg)]"
           }`}
         >
           <div className="flex items-center gap-2 mb-2">
@@ -139,7 +139,7 @@ export default function VerifyPage() {
               className={`h-6 w-6 flex items-center justify-center rounded-full text-xs font-semibold ${
                 linked
                   ? "gradient-income text-white"
-                  : "bg-white/10 text-slate-400"
+                  : "bg-[var(--glass-strong-bg)] text-[var(--muted)]"
               }`}
             >
               {linked ? <CheckCircle2 className="h-4 w-4" /> : "1"}
@@ -149,7 +149,7 @@ export default function VerifyPage() {
 
           {!linked && (
             <>
-              <p className="text-sm text-slate-400 mb-3">{t("auth.linkBotHint")}</p>
+              <p className="text-sm text-[var(--muted)] mb-3">{t("auth.linkBotHint")}</p>
               {deepLink ? (
                 <Button asChild className="w-full">
                   <a href={deepLink} target="_blank" rel="noopener noreferrer">
@@ -169,7 +169,7 @@ export default function VerifyPage() {
                   </a>
                 </Button>
               ) : null}
-              <div className="mt-3 flex items-center gap-2 text-xs text-slate-500">
+              <div className="mt-3 flex items-center gap-2 text-xs text-[var(--muted-foreground)]">
                 <Loader2 className="h-3 w-3 animate-spin" />
                 {t("auth.waitingLink")}
               </div>
@@ -185,12 +185,12 @@ export default function VerifyPage() {
         <div
           className={`rounded-xl border p-4 ${
             !linked
-              ? "opacity-50 border-white/10 bg-white/5"
-              : "border-white/10 bg-white/5"
+              ? "opacity-50 border-[var(--glass-border)] bg-[var(--glass-bg)]"
+              : "border-[var(--glass-border)] bg-[var(--glass-bg)]"
           }`}
         >
           <div className="flex items-center gap-2 mb-2">
-            <span className="h-6 w-6 flex items-center justify-center rounded-full text-xs font-semibold bg-white/10 text-slate-400">
+            <span className="h-6 w-6 flex items-center justify-center rounded-full text-xs font-semibold bg-[var(--glass-strong-bg)] text-[var(--muted)]">
               2
             </span>
             <span className="font-medium">{t("auth.stepOtp")}</span>

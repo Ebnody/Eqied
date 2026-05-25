@@ -79,7 +79,7 @@ export function ChangePasswordForm() {
           value={newPassword}
           onChange={(e) => setNewPassword(e.target.value)}
         />
-        <p className="text-xs text-slate-500">Minimum 8 characters</p>
+        <p className="text-xs text-slate-400">Minimum 8 characters</p>
       </div>
       <div className="space-y-2">
         <Label htmlFor="confirmPassword">Confirm New Password</Label>
@@ -93,12 +93,12 @@ export function ChangePasswordForm() {
       </div>
 
       {error && (
-        <div className="rounded-md bg-red-50 border border-red-200 text-red-700 text-sm px-3 py-2">
+        <div className="rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-sm px-3 py-2">
           {error}
         </div>
       )}
       {message && (
-        <div className="rounded-md bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm px-3 py-2">
+        <div className="rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-sm px-3 py-2">
           {message}
         </div>
       )}

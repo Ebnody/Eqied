@@ -40,7 +40,7 @@ export function MonthNavigator({ currentMonth, savedMonths }: Props) {
   const isFuture = next > today;
 
   return (
-    <div className="rounded-xl border bg-white p-4 shadow-sm space-y-3">
+    <div className="glass rounded-2xl border border-white/10 p-4 space-y-3">
       <div className="flex items-center gap-2">
         <Button
           variant="outline"
@@ -53,8 +53,8 @@ export function MonthNavigator({ currentMonth, savedMonths }: Props) {
 
         <div className="flex-1 text-center">
           <div className="flex items-center justify-center gap-2">
-            <Calendar className="h-4 w-4 text-slate-500" />
-            <span className="font-semibold text-slate-900">
+            <Calendar className="h-4 w-4 text-slate-400" />
+            <span className="font-semibold text-slate-100">
               {monthLabel(currentMonth)}
             </span>
           </div>
@@ -62,7 +62,7 @@ export function MonthNavigator({ currentMonth, savedMonths }: Props) {
             <button
               type="button"
               onClick={() => go(today)}
-              className="text-xs text-emerald-700 hover:underline mt-0.5"
+              className="text-xs text-emerald-400 hover:text-emerald-300 transition-colors mt-0.5"
             >
               Jump to current month
             </button>
@@ -81,7 +81,7 @@ export function MonthNavigator({ currentMonth, savedMonths }: Props) {
       </div>
 
       {savedMonths.length > 0 && (
-        <div className="border-t pt-3">
+        <div className="border-t border-white/10 pt-3">
           <p className="text-xs text-slate-500 mb-2">History</p>
           <div className="flex flex-wrap gap-1.5">
             {savedMonths.map((m) => {
@@ -93,8 +93,8 @@ export function MonthNavigator({ currentMonth, savedMonths }: Props) {
                   onClick={() => go(m)}
                   className={`text-xs px-2.5 py-1 rounded-full border transition ${
                     active
-                      ? "bg-emerald-600 text-white border-emerald-600"
-                      : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
+                      ? "gradient-accent text-white border-transparent"
+                      : "bg-white/5 text-slate-300 border-white/10 hover:bg-white/10"
                   }`}
                 >
                   {monthLabel(m)}

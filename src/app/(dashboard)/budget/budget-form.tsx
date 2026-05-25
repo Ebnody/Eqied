@@ -108,11 +108,11 @@ export function BudgetEditForm({ month, initialCategories, onClose }: Props) {
   }
 
   return (
-    <div className="rounded-xl border bg-white p-5 shadow-sm space-y-4">
+    <div className="glass rounded-2xl border border-[var(--glass-border)] p-5 shadow-sm space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="font-semibold text-slate-900">Edit Budget Plan</h2>
-        <span className="text-sm font-medium text-slate-700">
-          Total: <span className="text-emerald-700">{totalEtb.toLocaleString()} ETB</span>
+        <h2 className="font-semibold text-[var(--foreground)]">Edit Budget Plan</h2>
+        <span className="text-sm font-medium text-[var(--muted-foreground)]">
+          Total: <span className="text-[var(--accent)]">{totalEtb.toLocaleString()} ETB</span>
         </span>
       </div>
 
@@ -122,7 +122,7 @@ export function BudgetEditForm({ month, initialCategories, onClose }: Props) {
             <span className="text-lg" aria-hidden>
               {it.emoji}
             </span>
-            <span className="flex-1 text-sm text-slate-700 truncate">
+            <span className="flex-1 text-sm text-[var(--muted-foreground)] truncate">
               {it.name}
             </span>
             <div className="w-32">
@@ -137,15 +137,15 @@ export function BudgetEditForm({ month, initialCategories, onClose }: Props) {
                 placeholder="0"
               />
             </div>
-            <span className="text-xs text-slate-400 w-8 text-right">ETB</span>
+            <span className="text-xs text-[var(--muted)] w-8 text-right">ETB</span>
           </div>
         ))}
       </div>
 
-      <div className="flex items-center justify-between gap-3 pt-2 border-t">
+      <div className="flex items-center justify-between gap-3 pt-2 border-t border-[var(--glass-border)]">
         <div>
           {message && (
-            <p className="text-xs text-rose-600">{message}</p>
+            <p className="text-xs text-[var(--danger)]">{message}</p>
           )}
         </div>
         <div className="flex gap-2">

@@ -29,30 +29,30 @@ export default async function TransactionsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">
+        <h1 className="text-2xl font-bold text-[var(--foreground)]">
           {t("transactions.title")}
         </h1>
-        <p className="text-sm text-slate-500">{t("transactions.subtitle")}</p>
+        <p className="text-sm text-[var(--muted)]">{t("transactions.subtitle")}</p>
       </div>
 
-      <div className="rounded-xl border bg-white shadow-sm">
-        <div className="px-5 py-4 border-b flex items-center gap-2">
-          <Inbox className="h-4 w-4 text-amber-700" />
-          <h2 className="font-semibold text-slate-900">
+      <div className="glass rounded-2xl border border-[var(--glass-border)] shadow-sm">
+        <div className="px-5 py-4 border-b border-[var(--glass-border)] flex items-center gap-2">
+          <Inbox className="h-4 w-4 text-amber-400" />
+          <h2 className="font-semibold text-[var(--foreground)]">
             {t("transactions.inbox")}
             {uncategorized.length > 0 && (
-              <span className="ml-2 inline-flex items-center justify-center bg-amber-100 text-amber-800 text-xs font-medium px-2 py-0.5 rounded-full">
+              <span className="ml-2 inline-flex items-center justify-center bg-amber-500/15 text-amber-300 text-xs font-medium px-2 py-0.5 rounded-full">
                 {uncategorized.length}
               </span>
             )}
           </h2>
         </div>
         {uncategorized.length === 0 ? (
-          <p className="text-sm text-slate-500 text-center py-10 px-5">
+          <p className="text-sm text-[var(--muted-foreground)] text-center py-10 px-5">
             {t("transactions.uncategorizedEmpty")}
           </p>
         ) : (
-          <ul className="divide-y">
+          <ul className="divide-y divide-[var(--glass-border)]">
             {uncategorized.map((txn) => (
               <CategorizeRow key={txn.id} txn={txn} />
             ))}
@@ -60,8 +60,8 @@ export default async function TransactionsPage() {
         )}
       </div>
 
-      <div className="rounded-xl border bg-white p-5 shadow-sm">
-        <h2 className="font-semibold text-slate-900 mb-2">
+      <div className="glass rounded-2xl border border-[var(--glass-border)] p-5">
+        <h2 className="font-semibold text-[var(--foreground)] mb-2">
           {t("transactions.activity")}
         </h2>
         <TransactionList

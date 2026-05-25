@@ -27,8 +27,8 @@ export async function verifyPassword(
   return bcrypt.compare(password, hash);
 }
 
-export async function createSessionToken(userId: string): Promise<string> {
-  return new SignJWT({ sub: userId })
+export async function createSessionToken(userId: string, role?: string): Promise<string> {
+  return new SignJWT({ sub: userId, role })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setExpirationTime(`${SESSION_DURATION_SECONDS}s`)
@@ -40,6 +40,18 @@ export async function verifySessionToken(token: string): Promise<string | null> 
     const { payload } = await jwtVerify(token, getJwtSecret());
     if (typeof payload.sub !== "string") return null;
     return payload.sub;
+  } catch {
+    return null;
+  }
+}
+
+export async function verifySessionTokenPayload(
+  token: string
+): Promise<{ userId: string; role?: string } | null> {
+  try {
+    const { payload } = await jwtVerify(token, getJwtSecret());
+    if (typeof payload.sub !== "string") return null;
+    return { userId: payload.sub, role: payload.role as string | undefined };
   } catch {
     return null;
   }
@@ -77,6 +89,31 @@ export async function getCurrentUser() {
 export async function requireUser() {
   const user = await getCurrentUser();
   if (!user) throw new Error("UNAUTHORIZED");
+  return user;
+}
+
+export async function getCurrentAdmin() {
+  const user = await getCurrentUser();
+  if (!user) return null;
+  if (user.role !== "ADMIN" && user.role !== "SUPER_ADMIN") return null;
+  return user;
+}
+
+export async function requireAdmin() {
+  const user = await getCurrentUser();
+  if (!user) throw new Error("UNAUTHORIZED");
+  if (user.role !== "ADMIN" && user.role !== "SUPER_ADMIN") {
+    throw new Error("FORBIDDEN");
+  }
+  return user;
+}
+
+export async function requireSuperAdmin() {
+  const user = await getCurrentUser();
+  if (!user) throw new Error("UNAUTHORIZED");
+  if (user.role !== "SUPER_ADMIN") {
+    throw new Error("FORBIDDEN");
+  }
   return user;
 }
 

@@ -32,7 +32,7 @@ export function SpendingChart({ data }: Props) {
   const filtered = data.filter((d) => d.expense > 0);
   if (filtered.length === 0) {
     return (
-      <div className="text-sm text-slate-500 text-center py-8">
+      <div className="text-sm text-slate-400 text-center py-8">
         No expenses yet this month.
       </div>
     );

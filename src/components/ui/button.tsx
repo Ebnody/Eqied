@@ -4,21 +4,21 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--background)] disabled:pointer-events-none disabled:opacity-50",
   {
     variants: {
       variant: {
         default:
           "gradient-accent text-white hover:opacity-90 shadow-lg shadow-emerald-500/20",
         secondary:
-          "bg-white/5 text-slate-200 hover:bg-white/10 border border-white/10",
+          "bg-[var(--input-bg)] text-[var(--foreground)] hover:bg-[var(--glass-strong-bg)] border border-[var(--input-border)]",
         outline:
-          "border border-white/10 bg-white/5 hover:bg-white/10 text-slate-200",
+          "border border-[var(--input-border)] bg-[var(--input-bg)] hover:bg-[var(--glass-strong-bg)] text-[var(--foreground)]",
         ghost:
-          "hover:bg-white/5 text-slate-300 hover:text-white",
+          "hover:bg-white/5 text-[var(--muted)] hover:text-[var(--foreground)]",
         destructive:
           "gradient-expense text-white hover:opacity-90 shadow-lg shadow-rose-500/20",
-        link: "text-emerald-400 underline-offset-4 hover:underline hover:text-emerald-300",
+        link: "text-[var(--accent)] underline-offset-4 hover:underline hover:opacity-80",
       },
       size: {
         default: "h-10 px-4 py-2",

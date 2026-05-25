@@ -65,11 +65,11 @@ export function SalaryForm({
   return (
     <form
       onSubmit={onSubmit}
-      className="rounded-xl border bg-white p-5 shadow-sm space-y-4"
+      className="glass rounded-2xl border border-[var(--glass-border)] p-5 space-y-4"
     >
       <div>
-        <h2 className="font-semibold text-slate-900">Monthly Budget</h2>
-        <p className="text-xs text-slate-500 mt-0.5">Set your planned monthly budget amount</p>
+        <h2 className="font-semibold text-[var(--foreground)]">Monthly Budget</h2>
+        <p className="text-xs text-[var(--muted)] mt-0.5">Set your planned monthly budget amount</p>
       </div>
       <div className="grid sm:grid-cols-2 gap-4">
         <div className="space-y-2">
@@ -87,10 +87,10 @@ export function SalaryForm({
           />
         </div>
         <div className="flex items-end">
-          <label className="inline-flex items-center gap-2 text-sm text-slate-700">
+          <label className="inline-flex items-center gap-2 text-sm text-[var(--muted)]">
             <input
               type="checkbox"
-              className="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+              className="h-4 w-4 rounded border-[var(--input-border)] bg-[var(--input-bg)] text-[var(--accent)] focus:ring-[var(--input-focus-ring)]"
               checked={isReceived}
               onChange={(e) => setIsReceived(e.target.checked)}
             />
@@ -110,7 +110,7 @@ export function SalaryForm({
           )}
         </Button>
         {message && (
-          <p className="text-xs text-slate-600">{message}</p>
+          <p className="text-xs text-[var(--muted)]">{message}</p>
         )}
       </div>
     </form>

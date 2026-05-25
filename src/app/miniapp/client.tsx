@@ -148,6 +148,7 @@ export function MiniAppClient() {
     // Token-based auth is our primary flow now.
     const urlToken = getUrlToken();
     if (urlToken) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setTgState("ready");
       setDebug("token-auth");
       return;
@@ -205,13 +206,6 @@ export function MiniAppClient() {
     };
   }, []);
 
-  // Reset selected category when type changes
-  useEffect(() => {
-    if (cats.length > 0 && !cats.find((c) => c.key === categoryKey)) {
-      setCategoryKey(cats[0].key);
-    }
-  }, [cats, categoryKey]);
-
   async function onParse() {
     setParsing(true);
     setMessage(null);
@@ -227,7 +221,10 @@ export function MiniAppClient() {
         return;
       }
       setResult(data);
-      if (data.type) setType(data.type);
+      if (data.type) {
+        setType(data.type);
+        setCategoryKey(data.type === "income" ? (INCOME_CATEGORIES[0]?.key ?? "") : (EXPENSE_CATEGORIES[0]?.key ?? ""));
+      }
       if (data.amountSantim) setAmount(String(fromSantim(data.amountSantim)));
     } catch {
       setMessage({ kind: "err", text: t("common.networkError") });
@@ -299,16 +296,16 @@ export function MiniAppClient() {
 
   if (tgState === "loading") {
     return (
-      <main className="min-h-screen flex items-center justify-center p-6 bg-slate-50">
+      <main className="min-h-screen flex items-center justify-center p-6 bg-[var(--background)]">
         <div className="text-center">
-          <div className="flex items-center justify-center gap-2 text-slate-600 text-sm mb-2">
+          <div className="flex items-center justify-center gap-2 text-[var(--muted)] text-sm mb-2">
             <Loader2 className="h-4 w-4 animate-spin" />
             {t("miniapp.loading")}
           </div>
-          <p className="text-xs text-slate-400">debug: {debug}</p>
+          <p className="text-xs text-[var(--muted-foreground)]">debug: {debug}</p>
           <button
             onClick={() => setTgState("no-init-data")}
-            className="mt-4 text-xs text-emerald-700 underline"
+            className="mt-4 text-xs text-[var(--accent)] underline"
           >
             {t("miniapp.stuck")}
           </button>
@@ -319,11 +316,11 @@ export function MiniAppClient() {
 
   if (tgState === "outside") {
     return (
-      <main className="min-h-screen flex items-center justify-center p-6 bg-slate-50">
-        <div className="max-w-sm rounded-xl border bg-white p-6 shadow-sm text-center">
-          <AlertCircle className="h-8 w-8 mx-auto text-amber-600 mb-3" />
-          <h1 className="text-lg font-semibold mb-1">{t("miniapp.openInTelegram")}</h1>
-          <p className="text-sm text-slate-600">{t("miniapp.openInTelegramHint")}</p>
+      <main className="min-h-screen flex items-center justify-center p-6 bg-[var(--background)]">
+        <div className="max-w-sm rounded-xl border border-[var(--card-border)] bg-[var(--card)] p-6 shadow-sm text-center">
+          <AlertCircle className="h-8 w-8 mx-auto text-[var(--warning)] mb-3" />
+          <h1 className="text-lg font-semibold mb-1 text-[var(--foreground)]">{t("miniapp.openInTelegram")}</h1>
+          <p className="text-sm text-[var(--muted)]">{t("miniapp.openInTelegramHint")}</p>
         </div>
       </main>
     );
@@ -356,17 +353,17 @@ export function MiniAppClient() {
       }
     }
     return (
-      <main className="min-h-screen flex items-center justify-center p-6 bg-slate-50">
-        <div className="max-w-sm rounded-xl border bg-white p-6 shadow-sm text-center">
-          <AlertCircle className="h-8 w-8 mx-auto text-amber-600 mb-3" />
-          <h1 className="text-lg font-semibold mb-1">{t("miniapp.updateTelegram")}</h1>
-          <p className="text-sm text-slate-600">{t("miniapp.updateTelegramHint")}</p>
-          <pre className="mt-4 text-[10px] text-left bg-slate-100 rounded p-2 overflow-auto whitespace-pre-wrap">
+      <main className="min-h-screen flex items-center justify-center p-6 bg-[var(--background)]">
+        <div className="max-w-sm rounded-xl border border-[var(--card-border)] bg-[var(--card)] p-6 shadow-sm text-center">
+          <AlertCircle className="h-8 w-8 mx-auto text-[var(--warning)] mb-3" />
+          <h1 className="text-lg font-semibold mb-1 text-[var(--foreground)]">{t("miniapp.updateTelegram")}</h1>
+          <p className="text-sm text-[var(--muted)]">{t("miniapp.updateTelegramHint")}</p>
+          <pre className="mt-4 text-[10px] text-left bg-[var(--glass-bg)] rounded p-2 overflow-auto whitespace-pre-wrap text-[var(--foreground)]">
 {JSON.stringify({ debug, hashLen, hashKeys, hashSample, ...tgInfo }, null, 2)}
           </pre>
           <button
             onClick={() => window.location.reload()}
-            className="mt-3 text-xs text-emerald-700 underline"
+            className="mt-3 text-xs text-[var(--accent)] underline"
           >
             Reload
           </button>
@@ -376,15 +373,15 @@ export function MiniAppClient() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-50 p-4 pb-10">
+    <main className="min-h-screen bg-[var(--background)] p-4 pb-10">
       <div className="max-w-md mx-auto space-y-4">
         <header>
-          <h1 className="text-xl font-bold text-slate-900">{t("miniapp.title")}</h1>
-          <p className="text-xs text-slate-500">{t("miniapp.subtitle")}</p>
+          <h1 className="text-xl font-bold text-[var(--foreground)]">{t("miniapp.title")}</h1>
+          <p className="text-xs text-[var(--muted)]">{t("miniapp.subtitle")}</p>
         </header>
 
-        <section className="rounded-xl border bg-white p-4 shadow-sm space-y-3">
-          <label className="text-sm font-medium text-slate-700">
+        <section className="rounded-xl border border-[var(--card-border)] bg-[var(--card)] p-4 shadow-sm space-y-3">
+          <label className="text-sm font-medium text-[var(--muted-foreground)]">
             {t("miniapp.pasteLabel")}
           </label>
           <textarea
@@ -392,12 +389,12 @@ export function MiniAppClient() {
             onChange={(e) => setText(e.target.value)}
             rows={5}
             placeholder={t("miniapp.smsPlaceholder")}
-            className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none"
+            className="w-full rounded-md border border-[var(--input-border)] bg-[var(--input-bg)] px-3 py-2 text-sm text-[var(--input-text)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)] resize-none placeholder:text-[var(--input-placeholder)]"
           />
           <button
             onClick={onParse}
             disabled={!text.trim() || parsing}
-            className="w-full inline-flex items-center justify-center gap-2 rounded-md bg-emerald-600 text-white text-sm font-medium px-3 py-2 disabled:opacity-50 hover:bg-emerald-700 transition-colors"
+            className="w-full inline-flex items-center justify-center gap-2 rounded-md gradient-accent text-white text-sm font-medium px-3 py-2 disabled:opacity-50 hover:opacity-90 transition-all"
           >
             {parsing ? (
               <>
@@ -413,8 +410,8 @@ export function MiniAppClient() {
             <div
               className={`rounded-md border px-3 py-2 text-xs ${
                 result.ok
-                  ? "bg-emerald-50 border-emerald-200 text-emerald-900"
-                  : "bg-amber-50 border-amber-200 text-amber-900"
+                  ? "bg-[var(--accent)]/10 border-[var(--accent)]/20 text-[var(--accent)]"
+                  : "bg-[var(--warning)]/10 border-[var(--warning)]/20 text-[var(--warning)]"
               }`}
             >
               {result.ok ? (
@@ -437,30 +434,30 @@ export function MiniAppClient() {
           )}
         </section>
 
-        <section className="rounded-xl border bg-white p-4 shadow-sm space-y-4">
+        <section className="rounded-xl border border-[var(--card-border)] bg-[var(--card)] p-4 shadow-sm space-y-4">
           <div>
-            <label className="text-sm font-medium text-slate-700 mb-1.5 block">
+            <label className="text-sm font-medium text-[var(--muted-foreground)] mb-1.5 block">
               {t("miniapp.type")}
             </label>
             <div className="grid grid-cols-2 gap-2">
               <button
                 type="button"
-                onClick={() => setType("expense")}
+                onClick={() => { setType("expense"); setCategoryKey(EXPENSE_CATEGORIES[0]?.key ?? ""); }}
                 className={`rounded-md py-2 text-sm font-medium transition-colors ${
                   type === "expense"
-                    ? "bg-rose-600 text-white"
-                    : "bg-slate-100 text-slate-700"
+                    ? "gradient-expense text-white"
+                    : "bg-[var(--glass-bg)] text-[var(--muted-foreground)] hover:bg-[var(--glass-strong-bg)]"
                 }`}
               >
                 {t("miniapp.expense")}
               </button>
               <button
                 type="button"
-                onClick={() => setType("income")}
+                onClick={() => { setType("income"); setCategoryKey(INCOME_CATEGORIES[0]?.key ?? ""); }}
                 className={`rounded-md py-2 text-sm font-medium transition-colors ${
                   type === "income"
-                    ? "bg-emerald-600 text-white"
-                    : "bg-slate-100 text-slate-700"
+                    ? "gradient-income text-white"
+                    : "bg-[var(--glass-bg)] text-[var(--muted-foreground)] hover:bg-[var(--glass-strong-bg)]"
                 }`}
               >
                 {t("miniapp.income")}
@@ -471,7 +468,7 @@ export function MiniAppClient() {
           <div>
             <label
               htmlFor="amount"
-              className="text-sm font-medium text-slate-700 mb-1.5 block"
+              className="text-sm font-medium text-[var(--muted-foreground)] mb-1.5 block"
             >
               {t("miniapp.amountLabel")}
             </label>
@@ -483,13 +480,13 @@ export function MiniAppClient() {
               step="0.01"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
-              className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="w-full rounded-md border border-[var(--input-border)] bg-[var(--input-bg)] px-3 py-2 text-base text-[var(--input-text)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)] placeholder:text-[var(--input-placeholder)]"
               placeholder="0.00"
             />
           </div>
 
           <div>
-            <label className="text-sm font-medium text-slate-700 mb-1.5 block">
+            <label className="text-sm font-medium text-[var(--muted-foreground)] mb-1.5 block">
               {t("miniapp.categoryLabel")}
             </label>
             <div className="flex flex-wrap gap-1.5">
@@ -500,8 +497,8 @@ export function MiniAppClient() {
                   onClick={() => setCategoryKey(c.key)}
                   className={`text-xs px-2.5 py-1.5 rounded-full transition-colors ${
                     categoryKey === c.key
-                      ? "bg-emerald-600 text-white"
-                      : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                      ? "gradient-accent text-white"
+                      : "bg-[var(--glass-bg)] text-[var(--muted-foreground)] hover:bg-[var(--glass-strong-bg)]"
                   }`}
                 >
                   {c.emoji} {c.name}
@@ -514,8 +511,8 @@ export function MiniAppClient() {
             <div
               className={`rounded-md border px-3 py-2 text-sm ${
                 message.kind === "ok"
-                  ? "bg-emerald-50 border-emerald-200 text-emerald-900"
-                  : "bg-rose-50 border-rose-200 text-rose-900"
+                  ? "bg-[var(--accent)]/10 border-[var(--accent)]/20 text-[var(--accent)]"
+                  : "bg-[var(--danger)]/10 border-[var(--danger)]/20 text-[var(--danger)]"
               }`}
             >
               {message.kind === "ok" ? (
@@ -530,7 +527,7 @@ export function MiniAppClient() {
           <button
             onClick={onSave}
             disabled={!canSave}
-            className="w-full inline-flex items-center justify-center gap-2 rounded-md bg-emerald-600 text-white text-sm font-medium px-3 py-3 disabled:opacity-50 hover:bg-emerald-700 transition-colors"
+            className="w-full inline-flex items-center justify-center gap-2 rounded-md gradient-accent text-white text-sm font-medium px-3 py-3 disabled:opacity-50 hover:opacity-90 transition-all"
           >
             {saving ? (
               <>

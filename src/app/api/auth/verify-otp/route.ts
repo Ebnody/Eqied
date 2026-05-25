@@ -30,12 +30,12 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  await prisma.user.update({
+  const user = await prisma.user.update({
     where: { id: userId },
     data: { isVerified: true, linkToken: null, linkTokenExpiresAt: null },
   });
 
-  const token = await createSessionToken(userId);
+  const token = await createSessionToken(user.id, user.role);
   await setSessionCookie(token);
 
   return NextResponse.json({ ok: true });

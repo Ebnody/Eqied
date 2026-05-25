@@ -18,13 +18,13 @@ export default async function ExpensesPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">{t("nav.expenses")}</h1>
+        <h1 className="text-2xl font-bold text-[var(--foreground)]">{t("nav.expenses")}</h1>
       </div>
 
       <AddTransactionForm type="expense" />
 
-      <div className="rounded-xl border bg-white p-5 shadow-sm">
-        <h2 className="font-semibold text-slate-900 mb-2">
+      <div className="glass rounded-2xl border border-[var(--glass-border)] p-5">
+        <h2 className="font-semibold text-[var(--foreground)] mb-2">
           {t("dashboard.recent")}
         </h2>
         <TransactionList

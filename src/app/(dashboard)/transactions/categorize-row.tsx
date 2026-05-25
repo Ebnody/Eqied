@@ -63,20 +63,20 @@ export function CategorizeRow({ txn }: { txn: Txn }) {
             <span
               className={
                 txn.type === "income"
-                  ? "text-emerald-700 font-semibold"
-                  : "text-rose-700 font-semibold"
+                  ? "text-emerald-400 font-semibold"
+                  : "text-rose-400 font-semibold"
               }
             >
               {txn.type === "income" ? "+" : "-"}
               {formatETB(txn.amount)}
             </span>
             {txn.provider && (
-              <span className="text-xs bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded">
+              <span className="text-xs bg-white/10 text-slate-300 px-1.5 py-0.5 rounded">
                 {txn.provider}
               </span>
             )}
           </div>
-          <p className="text-xs text-slate-500 mt-0.5">
+          <p className="text-xs text-slate-400 mt-0.5">
             {txn.counterparty && <>· {txn.counterparty} </>}
             {txn.reference && <>Ref: {txn.reference}</>}
           </p>
@@ -84,7 +84,7 @@ export function CategorizeRow({ txn }: { txn: Txn }) {
         <button
           onClick={ignore}
           disabled={!!busy}
-          className="text-slate-400 hover:text-rose-700 inline-flex items-center gap-1 text-xs"
+          className="text-slate-500 hover:text-rose-400 inline-flex items-center gap-1 text-xs transition-colors"
           title={t("transactions.ignore")}
         >
           {busy === "ignore" ? (
@@ -101,7 +101,7 @@ export function CategorizeRow({ txn }: { txn: Txn }) {
             key={c.key}
             onClick={() => categorize(c.key)}
             disabled={!!busy}
-            className="text-xs bg-slate-100 hover:bg-emerald-100 hover:text-emerald-800 text-slate-700 px-2.5 py-1 rounded-full transition-colors disabled:opacity-50 inline-flex items-center gap-1"
+            className="text-xs bg-white/10 hover:bg-emerald-500/15 hover:text-emerald-300 text-slate-300 px-2.5 py-1 rounded-full transition-colors disabled:opacity-50 inline-flex items-center gap-1"
           >
             {busy === c.key && <Loader2 className="h-3 w-3 animate-spin" />}
             <span>{c.emoji}</span> {c.name}

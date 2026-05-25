@@ -56,11 +56,11 @@ export default async function BudgetPage({ searchParams }: PageProps) {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">{t("budget.title")}</h1>
-        <p className="text-sm text-slate-500">
+        <h1 className="text-2xl font-bold text-[var(--foreground)]">{t("budget.title")}</h1>
+        <p className="text-sm text-[var(--muted)]">
           {monthLabel(monthKey)}
           {isPast && (
-            <span className="ml-2 text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded text-xs">
+            <span className="ml-2 text-amber-300 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded text-xs">
               Viewing past month
             </span>
           )}
@@ -85,7 +85,7 @@ export default async function BudgetPage({ searchParams }: PageProps) {
       )}
 
       {!budget && !salary && (
-        <div className="rounded-xl border border-dashed bg-slate-50 p-6 text-center text-sm text-slate-600">
+        <div className="glass rounded-2xl border border-dashed border-[var(--glass-border)] p-6 text-center text-sm text-[var(--muted)]">
           No budget or salary recorded for {monthLabel(monthKey)}. Enter a
           monthly amount above to create one.
         </div>

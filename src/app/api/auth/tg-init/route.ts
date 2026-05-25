@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: auth.reason }, { status: 401 });
   }
 
-  const token = await createSessionToken(auth.user.id);
+  const token = await createSessionToken(auth.user.id, auth.user.role);
   await setSessionCookie(token);
 
   return NextResponse.json({ ok: true });

@@ -556,7 +556,7 @@ export async function handleTelegramUpdate(update: TgUpdate) {
         await sendTelegramMessage(chatId, "👋 Your account isn't linked yet. Please send /start to link your account.");
         return;
       }
-      const token = await createSessionToken(link.user.id);
+      const token = await createSessionToken(link.user.id, link.user.role);
       const baseUrl = buildAppUrl("/miniapp");
       if (baseUrl) {
         const miniUrl = `${baseUrl}?t=${token}`;

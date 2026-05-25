@@ -28,7 +28,6 @@ type Listener = (event: RoommateEvent) => void;
 
 // Use a module-level singleton stored on globalThis so HMR doesn't drop subscribers.
 declare global {
-  // eslint-disable-next-line no-var
   var __roommateEventBus: Map<string, Set<Listener>> | undefined;
 }
 

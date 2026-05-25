@@ -15,11 +15,15 @@ export default async function Home() {
   const { t } = await getServerT();
 
   return (
-    <div className="flex-1 flex flex-col">
-      <header className="border-b bg-white/70 backdrop-blur sticky top-0 z-10">
+    <div className="flex-1 flex flex-col bg-background min-h-screen relative overflow-hidden">
+      {/* Ambient gradient orbs */}
+      <div className="fixed top-0 left-1/3 w-[500px] h-[500px] bg-emerald-500/5 rounded-full blur-[128px] pointer-events-none" />
+      <div className="fixed bottom-0 right-1/3 w-[400px] h-[400px] bg-violet-500/5 rounded-full blur-[128px] pointer-events-none" />
+
+      <header className="border-b border-[var(--glass-border)] glass sticky top-0 z-10 relative">
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-2 font-semibold text-emerald-700">
-            <Wallet className="h-5 w-5" />
+          <div className="flex items-center gap-2 font-semibold gradient-text">
+            <Wallet className="h-5 w-5 text-emerald-400" />
             EthioBudget
           </div>
           <nav className="flex items-center gap-2">
@@ -37,14 +41,14 @@ export default async function Home() {
       </header>
 
       <section className="flex-1 max-w-6xl mx-auto px-4 py-16 md:py-24 grid md:grid-cols-2 gap-12 items-center">
-        <div>
-          <span className="inline-block bg-emerald-100 text-emerald-800 text-xs font-medium px-3 py-1 rounded-full mb-4">
+        <div className="relative z-10">
+          <span className="inline-block bg-emerald-500/15 text-emerald-300 text-xs font-medium px-3 py-1 rounded-full mb-4 border border-emerald-500/20">
             {t("landing.tag")}
           </span>
-          <h1 className="text-4xl md:text-5xl font-bold leading-tight text-slate-900">
+          <h1 className="text-4xl md:text-5xl font-bold leading-tight text-[var(--foreground)]">
             {t("landing.hero")}
           </h1>
-          <p className="mt-4 text-lg text-slate-600 max-w-md">
+          <p className="mt-4 text-lg text-[var(--muted)] max-w-md">
             {t("landing.heroSub")}
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
@@ -59,16 +63,16 @@ export default async function Home() {
           </div>
         </div>
 
-        <div className="bg-gradient-to-br from-emerald-50 to-amber-50 border rounded-2xl p-6 shadow-sm">
+        <div className="glass rounded-2xl border border-[var(--glass-border)] p-6 relative z-10">
           <div className="space-y-4">
-            <div className="bg-white border rounded-xl p-4 shadow-sm">
-              <p className="text-xs text-slate-500">→ Telegram</p>
-              <p className="mt-1 text-sm">
+            <div className="bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl p-4">
+              <p className="text-xs text-[var(--muted)]">→ Telegram</p>
+              <p className="mt-1 text-sm text-[var(--foreground)]">
                 You have transferred ETB 1,200.00 to Abebe Kebede.
                 Transaction No: TLB12345.
               </p>
             </div>
-            <div className="bg-emerald-600 text-white rounded-xl p-4 shadow-sm">
+            <div className="gradient-accent text-white rounded-xl p-4">
               <p className="text-xs opacity-80">🤖</p>
               <p className="mt-1 text-sm">
                 📤 ETB 1,200.00
@@ -85,7 +89,7 @@ export default async function Home() {
                 <span className="bg-white/20 text-xs px-2 py-1 rounded">
                   💊
                 </span>
-                <span className="bg-white text-emerald-800 text-xs px-2 py-1 rounded font-semibold">
+                <span className="bg-white text-emerald-700 text-xs px-2 py-1 rounded font-semibold">
                   👨‍👩‍👧
                 </span>
               </div>
@@ -94,7 +98,7 @@ export default async function Home() {
         </div>
       </section>
 
-      <section className="bg-white border-y">
+      <section className="border-y border-[var(--glass-border)] glass relative z-10">
         <div className="max-w-6xl mx-auto px-4 py-16 grid md:grid-cols-3 gap-8">
           <Feature
             icon={<MessageCircle className="h-5 w-5" />}
@@ -114,8 +118,8 @@ export default async function Home() {
         </div>
       </section>
 
-      <section className="max-w-6xl mx-auto px-4 py-16">
-        <h2 className="text-2xl font-bold text-slate-900 text-center">
+      <section className="max-w-6xl mx-auto px-4 py-16 relative z-10">
+        <h2 className="text-2xl font-bold text-[var(--foreground)] text-center">
           {t("landing.howItWorks")}
         </h2>
         <div className="mt-10 grid md:grid-cols-4 gap-6">
@@ -126,8 +130,8 @@ export default async function Home() {
         </div>
       </section>
 
-      <footer className="border-t bg-white">
-        <div className="max-w-6xl mx-auto px-4 py-6 flex items-center justify-between text-sm text-slate-500">
+      <footer className="border-t border-[var(--glass-border)] glass relative z-10">
+        <div className="max-w-6xl mx-auto px-4 py-6 flex items-center justify-between text-sm text-[var(--muted-foreground)]">
           <div className="flex items-center gap-2">
             <Shield className="h-4 w-4" />
             {t("landing.private")}
@@ -150,23 +154,23 @@ function Feature({
 }) {
   return (
     <div>
-      <div className="h-10 w-10 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center">
+      <div className="h-10 w-10 rounded-xl bg-emerald-500/15 text-emerald-300 flex items-center justify-center border border-emerald-500/20">
         {icon}
       </div>
-      <h3 className="mt-3 font-semibold text-slate-900">{title}</h3>
-      <p className="mt-1 text-sm text-slate-600">{text}</p>
+      <h3 className="mt-3 font-semibold text-[var(--foreground)]">{title}</h3>
+      <p className="mt-1 text-sm text-[var(--muted)]">{text}</p>
     </div>
   );
 }
 
 function Step({ n, title, text }: { n: number; title: string; text: string }) {
   return (
-    <div className="rounded-xl border bg-white p-5">
-      <div className="h-8 w-8 rounded-full bg-emerald-600 text-white flex items-center justify-center font-semibold text-sm">
+    <div className="glass rounded-2xl border border-[var(--glass-border)] p-5">
+      <div className="h-8 w-8 rounded-full gradient-accent text-white flex items-center justify-center font-semibold text-sm">
         {n}
       </div>
-      <h3 className="mt-3 font-semibold text-slate-900">{title}</h3>
-      <p className="mt-1 text-sm text-slate-600">{text}</p>
+      <h3 className="mt-3 font-semibold text-[var(--foreground)]">{title}</h3>
+      <p className="mt-1 text-sm text-[var(--muted)]">{text}</p>
     </div>
   );
 }

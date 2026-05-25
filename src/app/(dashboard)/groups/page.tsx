@@ -68,10 +68,10 @@ export default function GroupsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-800">
+          <h1 className="text-2xl font-semibold text-[var(--foreground)]">
             {t("roommate.page.groupsTitle")}
           </h1>
-          <p className="text-sm text-slate-500 mt-1">
+          <p className="text-sm text-[var(--muted)] mt-1">
             {t("roommate.page.groupsSubtitle")}
           </p>
         </div>
@@ -82,7 +82,7 @@ export default function GroupsPage() {
       </div>
 
       {showForm && (
-        <Card>
+        <Card className="border-[var(--glass-border)]">
           <CardContent className="p-5 space-y-4">
             <form onSubmit={createGroup} className="space-y-4">
               <div className="space-y-2">
@@ -115,7 +115,7 @@ export default function GroupsPage() {
                   value={form.password}
                   onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
                 />
-                <p className="text-xs text-slate-500">{t("roommate.page.groupPasswordHelp")}</p>
+                <p className="text-xs text-[var(--muted)]">{t("roommate.page.groupPasswordHelp")}</p>
               </div>
               <div className="flex gap-3">
                 <Button type="submit" disabled={saving}>
@@ -131,8 +131,8 @@ export default function GroupsPage() {
       )}
 
       {groups.length === 0 ? (
-        <div className="rounded-xl border bg-white p-10 text-center text-slate-500">
-          <Users className="mx-auto h-10 w-10 text-slate-300 mb-3" />
+        <div className="glass rounded-2xl border border-[var(--glass-border)] p-10 text-center text-[var(--muted)]">
+          <Users className="mx-auto h-10 w-10 text-[var(--muted-foreground)] mb-3" />
           <p>{t("roommate.page.noGroupsYet")}</p>
         </div>
       ) : (
@@ -141,29 +141,29 @@ export default function GroupsPage() {
             <Link
               key={g.groupId}
               href={`/groups/${g.groupId}`}
-              className="group rounded-xl border bg-white p-5 shadow-sm hover:border-emerald-300 hover:shadow transition-all"
+              className="group glass rounded-2xl border border-[var(--glass-border)] p-5 hover:border-[var(--accent)]/30 hover:bg-[var(--glass-strong-bg)] transition-all"
             >
               <div className="flex items-start justify-between">
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-slate-800 truncate">
+                  <h3 className="font-semibold text-[var(--foreground)] truncate">
                     {g.name}
                   </h3>
                   {g.description && (
-                    <p className="mt-1 text-sm text-slate-500 truncate">
+                    <p className="mt-1 text-sm text-[var(--muted)] truncate">
                       {g.description}
                     </p>
                   )}
                 </div>
-                <ArrowRight className="h-5 w-5 text-slate-300 group-hover:text-emerald-500 shrink-0 ml-2" />
+                <ArrowRight className="h-5 w-5 text-[var(--muted-foreground)] group-hover:text-emerald-400 shrink-0 ml-2" />
               </div>
-              <div className="mt-4 flex items-center gap-4 text-xs text-slate-500">
+              <div className="mt-4 flex items-center gap-4 text-xs text-[var(--muted)]">
                 <span className="flex items-center gap-1">
                   <Users className="h-3.5 w-3.5" />
                   {g.memberCount} {t("roommate.page.members")}
                 </span>
                 <span>{g.expenseCount} {t("roommate.page.expenses")}</span>
                 {g.role === "owner" && (
-                  <span className="flex items-center gap-1 text-amber-600">
+                  <span className="flex items-center gap-1 text-amber-400">
                     <Crown className="h-3.5 w-3.5" />
                     {t("roommate.page.owner")}
                   </span>
