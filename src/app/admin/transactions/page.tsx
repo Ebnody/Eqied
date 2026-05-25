@@ -3,8 +3,9 @@ import { TransactionsTable, TxRow } from "./transactions-table";
 
 export const dynamic = "force-dynamic";
 
-async function getTransactions(): Promise<TxRow[]> {
+async function getTransactions(userId?: string): Promise<TxRow[]> {
   const rows = await prisma.transaction.findMany({
+    where: userId ? { userId } : undefined,
     orderBy: { occurredAt: "desc" },
     take: 500,
     include: {
@@ -29,7 +30,8 @@ async function getTransactions(): Promise<TxRow[]> {
   }));
 }
 
-export default async function AdminTransactionsPage() {
-  const transactions = await getTransactions();
-  return <TransactionsTable transactions={transactions} />;
+export default async function AdminTransactionsPage({ searchParams }: { searchParams: Promise<{ user?: string }> }) {
+  const { user } = await searchParams;
+  const transactions = await getTransactions(user);
+  return <TransactionsTable transactions={transactions} userId={user} />;
 }

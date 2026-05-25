@@ -29,6 +29,7 @@ export interface TxRow {
 
 interface Props {
   transactions: TxRow[];
+  userId?: string;
 }
 
 type TypeFilter = "all" | "income" | "expense";
@@ -41,7 +42,7 @@ function formatETB(santim: number) {
   })}`;
 }
 
-export function TransactionsTable({ transactions }: Props) {
+export function TransactionsTable({ transactions, userId }: Props) {
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState<TypeFilter>("all");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
@@ -248,6 +249,20 @@ export function TransactionsTable({ transactions }: Props) {
           </button>
         </div>
       </div>
+
+      {userId && (
+        <div className="flex items-center gap-3 rounded-xl bg-sky-500/5 border border-sky-500/10 px-4 py-3">
+          <span className="text-sm text-sky-400">
+            Showing transactions for a specific user only.
+          </span>
+          <Link
+            href="/admin/transactions"
+            className="inline-flex items-center gap-1 text-sm font-medium text-sky-400 hover:text-sky-300 underline underline-offset-2"
+          >
+            Show all
+          </Link>
+        </div>
+      )}
 
       <div className="relative max-w-md">
         <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--muted)]" />

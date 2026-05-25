@@ -3,6 +3,7 @@ import { requireAdmin } from "@/lib/auth";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Calendar, CreditCard, User, Hash, FileText, Banknote } from "lucide-react";
+import { ExportSingleTransaction } from "@/components/admin/export-single-transaction";
 
 export const dynamic = "force-dynamic";
 
@@ -25,13 +26,32 @@ export default async function TransactionDetailPage({ params }: { params: Promis
 
   return (
     <div className="space-y-6 max-w-3xl mx-auto">
-      <Link
-        href="/admin/transactions"
-        className="inline-flex items-center gap-1.5 text-sm text-[var(--muted)] hover:text-[var(--foreground)] transition-colors"
-      >
-        <ArrowLeft className="h-4 w-4" />
-        Back to Transactions
-      </Link>
+      <div className="flex items-center gap-3">
+        <Link
+          href="/admin/transactions"
+          className="inline-flex items-center gap-1.5 text-sm text-[var(--muted)] hover:text-[var(--foreground)] transition-colors"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back to Transactions
+        </Link>
+        <ExportSingleTransaction
+          transaction={{
+            id: tx.id,
+            type: tx.type,
+            amount: tx.amount,
+            categoryKey: tx.categoryKey,
+            source: tx.source,
+            paymentMethod: tx.paymentMethod,
+            status: tx.status,
+            counterparty: tx.counterparty,
+            reference: tx.reference,
+            occurredAt: tx.occurredAt.toISOString(),
+            notes: tx.notes,
+            userName: tx.user?.fullName ?? null,
+            userPhone: tx.user?.phone ?? null,
+          }}
+        />
+      </div>
 
       <div className="glass rounded-2xl border border-[var(--glass-border)] p-6">
         <div className="flex items-center justify-between mb-4">

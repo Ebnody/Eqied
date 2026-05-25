@@ -3,6 +3,7 @@ import { requireAdmin } from "@/lib/auth";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Phone, Send, Calendar, Ban, Shield, CheckCircle, Clock } from "lucide-react";
+import { ExportUserTransactions } from "@/components/admin/export-user-transactions";
 
 export const dynamic = "force-dynamic";
 
@@ -162,7 +163,11 @@ export default async function UserDetailPage({ params }: { params: Promise<{ id:
 
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Recent Transactions */}
-        <SectionCard title="Recent Transactions" href={`/admin/transactions?user=${id}`}>
+        <SectionCard
+          title="Recent Transactions"
+          href={`/admin/transactions?user=${id}`}
+          action={<ExportUserTransactions userId={id} userName={user.fullName ?? "User"} />}
+        >
           {user.transactions.length === 0 ? (
             <EmptyState>No transactions yet.</EmptyState>
           ) : (
@@ -277,16 +282,19 @@ function StatCard({ label, value }: { label: string; value: string }) {
   );
 }
 
-function SectionCard({ title, children, href }: { title: string; children: React.ReactNode; href?: string }) {
+function SectionCard({ title, children, href, action }: { title: string; children: React.ReactNode; href?: string; action?: React.ReactNode }) {
   return (
     <div className="glass rounded-2xl border border-[var(--glass-border)] overflow-hidden">
       <div className="px-5 py-4 border-b border-[var(--glass-border)] flex items-center justify-between">
         <h2 className="font-semibold text-[var(--foreground)]">{title}</h2>
-        {href && (
-          <Link href={href} className="text-xs text-emerald-400 hover:text-emerald-300">
-            View all
-          </Link>
-        )}
+        <div className="flex items-center gap-3">
+          {action}
+          {href && (
+            <Link href={href} className="text-xs text-emerald-400 hover:text-emerald-300">
+              View all
+            </Link>
+          )}
+        </div>
       </div>
       <div className="px-5 py-2">{children}</div>
     </div>
