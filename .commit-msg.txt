@@ -1,7 +1,0 @@
-feat(support): Telegram DM delivery when admin replies to a ticket (Phase 6)
-
-- Admin reply route now looks up the user's TelegramLink and sends a DM via existing sendTelegramMessage helper
-- Fire-and-forget pattern (does not block API response)
-- Includes subject, first 400 chars of admin reply, and a prompt to open the app
-- Silent no-op when user has no Telegram linked
-- Failures logged but don't break the reply flow
