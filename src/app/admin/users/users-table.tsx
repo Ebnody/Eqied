@@ -3,14 +3,14 @@
 import { useMemo, useRef, useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Search, Filter, Mail, Phone, Download, X } from "lucide-react";
+import { Search, Filter, Phone, Send, Download, X } from "lucide-react";
 import { UserRowActions } from "@/components/admin/user-row-actions";
 import { downloadCsv, toCsv } from "@/lib/csv";
 
 export interface UserRow {
   id: string;
   name: string;
-  email: string;
+  telegramUsername: string | null;
   phone: string;
   status: "active" | "suspended" | "pending";
   joined: string;
@@ -60,7 +60,7 @@ export function UsersTable({ users, adminId, isSuperAdmin }: Props) {
       if (statusFilter !== "all" && u.status !== statusFilter) return false;
       if (dateCutoff && new Date(u.joinedAt).getTime() < dateCutoff) return false;
       if (q) {
-        const hay = `${u.name} ${u.email} ${u.phone}`.toLowerCase();
+        const hay = `${u.name} ${u.telegramUsername ?? ""} ${u.phone}`.toLowerCase();
         if (!hay.includes(q)) return false;
       }
       return true;
@@ -74,14 +74,14 @@ export function UsersTable({ users, adminId, isSuperAdmin }: Props) {
     const rows = filtered.map((u) => [
       u.id,
       u.name,
-      u.email,
+      u.telegramUsername ?? "",
       u.phone,
       u.status,
       u.joined,
       u.transactions,
     ]);
     const csv = toCsv(
-      ["ID", "Name", "Email", "Phone", "Status", "Joined", "Transactions"],
+      ["ID", "Name", "Telegram", "Phone", "Status", "Joined", "Transactions"],
       rows
     );
     downloadCsv(`users-${new Date().toISOString().slice(0, 10)}.csv`, csv);
@@ -198,7 +198,7 @@ export function UsersTable({ users, adminId, isSuperAdmin }: Props) {
           type="search"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search users by name, email, or phone..."
+          placeholder="Search users by name or phone..."
           className="h-11 w-full rounded-xl border border-[var(--glass-border)] bg-[var(--glass-bg)] pl-10 pr-10 text-sm text-[var(--foreground)] placeholder:text-[var(--muted)] focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
         />
         {search && (
@@ -248,10 +248,12 @@ export function UsersTable({ users, adminId, isSuperAdmin }: Props) {
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex flex-col gap-0.5">
-                        <span className="inline-flex items-center gap-1.5 text-xs text-[var(--muted)]">
-                          <Mail className="h-3 w-3" />
-                          {user.email}
-                        </span>
+                        {user.telegramUsername && (
+                          <span className="inline-flex items-center gap-1.5 text-xs text-sky-400">
+                            <Send className="h-3 w-3" />
+                            @{user.telegramUsername}
+                          </span>
+                        )}
                         <span className="inline-flex items-center gap-1.5 text-xs text-[var(--muted-foreground)]">
                           <Phone className="h-3 w-3" />
                           {user.phone}

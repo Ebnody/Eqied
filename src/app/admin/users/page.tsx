@@ -12,7 +12,7 @@ async function getUsers(): Promise<UserRow[]> {
     select: {
       id: true,
       fullName: true,
-      email: true,
+      telegramUsername: true,
       phone: true,
       isVerified: true,
       disabledAt: true,
@@ -22,8 +22,8 @@ async function getUsers(): Promise<UserRow[]> {
   });
   return rows.map((u) => ({
     id: u.id,
-    name: u.fullName || u.email || u.phone || "Unnamed",
-    email: u.email || "—",
+    name: u.fullName || u.phone || "Unnamed",
+    telegramUsername: u.telegramUsername,
     phone: u.phone || "—",
     status: u.disabledAt
       ? "suspended"
