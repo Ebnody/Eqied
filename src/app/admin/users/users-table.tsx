@@ -4,6 +4,7 @@ import { useMemo, useRef, useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Search, Filter, Phone, Send, Download, X } from "lucide-react";
+import Link from "next/link";
 import { UserRowActions } from "@/components/admin/user-row-actions";
 import { downloadCsv, toCsv } from "@/lib/csv";
 
@@ -241,9 +242,12 @@ export function UsersTable({ users, adminId, isSuperAdmin }: Props) {
                         <div className="h-9 w-9 rounded-full gradient-accent flex items-center justify-center text-sm font-bold text-white">
                           {user.name.charAt(0).toUpperCase()}
                         </div>
-                        <span className="text-sm font-medium text-[var(--foreground)]">
+                        <Link
+                          href={`/admin/users/${user.id}`}
+                          className="text-sm font-medium text-[var(--foreground)] hover:text-emerald-400 transition-colors"
+                        >
                           {user.name}
-                        </span>
+                        </Link>
                       </div>
                     </td>
                     <td className="px-6 py-4">

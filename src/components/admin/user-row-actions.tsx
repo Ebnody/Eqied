@@ -8,6 +8,7 @@ import {
   Play,
   Trash2,
   Loader2,
+  Eye,
 } from "lucide-react";
 
 interface UserRowActionsProps {
@@ -105,6 +106,17 @@ export function UserRowActions({
 
       {open && (
         <div className="absolute right-0 top-full mt-1 z-20 w-48 overflow-hidden rounded-xl border border-[var(--glass-border)] bg-[var(--glass-strong-bg)] backdrop-blur-xl shadow-2xl">
+          <button
+            onClick={() => {
+              router.push(`/admin/users/${userId}`);
+              setOpen(false);
+            }}
+            disabled={busy}
+            className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-[var(--foreground)] hover:bg-[var(--glass-bg)] transition-colors disabled:opacity-50"
+          >
+            <Eye className="h-4 w-4 text-sky-400" />
+            View profile
+          </button>
           <button
             onClick={handleSuspendToggle}
             disabled={busy}
