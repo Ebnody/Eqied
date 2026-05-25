@@ -10,6 +10,7 @@ import {
   Download,
   X,
 } from "lucide-react";
+import Link from "next/link";
 import { GroupRowActions } from "@/components/admin/group-row-actions";
 import { downloadCsv, toCsv } from "@/lib/csv";
 
@@ -254,7 +255,12 @@ export function GroupsTable({ groups, isSuperAdmin }: Props) {
                         <div className="h-9 w-9 rounded-lg bg-[var(--glass-bg)] flex items-center justify-center">
                           <UsersRound className="h-4 w-4 text-[var(--muted)]" />
                         </div>
-                        <span className="text-sm font-medium text-[var(--foreground)]">{g.name}</span>
+                        <Link
+                          href={`/admin/groups/${g.id}`}
+                          className="text-sm font-medium text-[var(--foreground)] hover:text-emerald-400 transition-colors"
+                        >
+                          {g.name}
+                        </Link>
                       </div>
                     </td>
                     <td className="px-6 py-4 text-sm text-[var(--muted-foreground)]">{g.owner}</td>
