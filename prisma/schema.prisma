@@ -55,6 +55,7 @@ model User {
   roommateGroupsOwned RoommateGroup[]       @relation("RoommateGroupOwner")
   roommateInvitesSent RoommateInvite[]      @relation("RoommateInviteCreator")
   adminLogs           AdminLog[]
+  issueReports        IssueReport[]
 
   @@index([phone])
   @@index([telegramUsername])
@@ -406,4 +407,40 @@ model AdminLog {
   @@index([action])
   @@index([createdAt])
   @@index([adminId, createdAt])
+}
+
+// =================== ISSUE REPORTS / SUPPORT TICKETS ===================
+
+model IssueReport {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subject     String
+  category    String   @default("other") // "bug" | "payment" | "feature" | "account" | "other"
+  status      String   @default("open")  // "open" | "in_progress" | "resolved" | "closed"
+  priority    String   @default("normal") // "low" | "normal" | "high"
+  lastReplyAt DateTime @default(now())
+  lastReplyBy String   @default("user") // "user" | "admin"
+  unreadByUser  Boolean @default(false) // true when admin has replied since user last viewed
+  unreadByAdmin Boolean @default(true)  // true when user has new activity unseen by admins
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  messages    IssueMessage[]
+
+  @@index([userId, createdAt])
+  @@index([status, lastReplyAt])
+  @@index([unreadByAdmin])
+}
+
+model IssueMessage {
+  id          String   @id @default(cuid())
+  issueId     String
+  issue       IssueReport @relation(fields: [issueId], references: [id], onDelete: Cascade)
+  senderType  String   // "user" | "admin"
+  senderId    String   // userId of sender (admin or user)
+  body        String
+  createdAt   DateTime @default(now())
+
+  @@index([issueId, createdAt])
 }

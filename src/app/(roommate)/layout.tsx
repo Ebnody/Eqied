@@ -1,5 +1,6 @@
 import { getCurrentUser } from "@/lib/auth";
 import { Sidebar } from "@/components/dashboard/sidebar";
+import { SupportBubble } from "@/components/support/support-bubble";
 
 export default async function RoommateLayout({
   children,
@@ -20,6 +21,7 @@ export default async function RoommateLayout({
           {children}
         </div>
       </main>
+      {user && <SupportBubble />}
     </div>
   );
 }

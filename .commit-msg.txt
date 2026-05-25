@@ -1,10 +1,11 @@
-feat(admin): suspend/delete users and archive/delete groups with audit logging (Phase 2)
+feat(support): floating help bubble for users to report issues + ticket thread API (Phase 3)
 
-- Add disabledAt + disabledReason to User model
-- Add archivedAt to RoommateGroup model
-- Block suspended users from logging in (user + admin auth)
-- New API: PATCH/DELETE /api/admin/users/[id] (suspend/unsuspend; super admin can hard-delete)
-- New API: PATCH/DELETE /api/admin/groups/[id] (archive/unarchive; super admin can hard-delete)
-- Working dropdown action menu on /admin/users and /admin/groups rows
-- Confirmation modal for destructive deletes
-- All actions logged to AdminLog
+- New schema: IssueReport + IssueMessage models (subject, category, status, threaded messages)
+- New API: POST/GET /api/issues, GET /api/issues/[id], POST /api/issues/[id]/messages
+- New SupportBubble client component (bottom-right floating button on user pages)
+  - Lists user's tickets with unread badge and status icons
+  - New ticket form (subject, category, body)
+  - Thread view with reply box (closed tickets are read-only)
+  - Polls /api/issues every 60s for unread admin replies
+- Mounted on (dashboard) and (roommate) layouts
+- User reopen behavior: replying to a resolved ticket reopens it

@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { Sidebar } from "@/components/dashboard/sidebar";
+import { SupportBubble } from "@/components/support/support-bubble";
 
 export default async function DashboardLayout({
   children,
@@ -21,6 +22,7 @@ export default async function DashboardLayout({
       <main className="flex-1 min-w-0 relative z-10">
         <div className="max-w-6xl mx-auto px-4 py-6 md:py-8">{children}</div>
       </main>
+      <SupportBubble />
     </div>
   );
 }
