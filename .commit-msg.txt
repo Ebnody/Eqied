@@ -1,1 +1,1 @@
-fix: roommate group sub-pages crashing on Vercel - replace broken server-side fetch with client-side load on mount
+feat: replace mock data on admin dashboard with real-time database stats from Prisma

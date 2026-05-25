@@ -9,8 +9,146 @@ import {
   CreditCard,
   UsersRound,
 } from "lucide-react";
+import { prisma } from "@/lib/prisma";
 
-export default function AdminDashboardPage() {
+export const dynamic = "force-dynamic";
+
+function formatETB(santim: number): string {
+  const etb = santim / 100;
+  if (etb >= 1_000_000) return `ETB ${(etb / 1_000_000).toFixed(1)}M`;
+  if (etb >= 1_000) return `ETB ${(etb / 1_000).toFixed(1)}K`;
+  return `ETB ${etb.toLocaleString("en-US", { maximumFractionDigits: 0 })}`;
+}
+
+function timeAgo(date: Date): string {
+  const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
+  if (seconds < 60) return `${seconds}s ago`;
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes} min ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  return `${days}d ago`;
+}
+
+async function getDashboardData() {
+  const now = new Date();
+  const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const startOfPrevMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+
+  const [
+    totalUsers,
+    totalTransactions,
+    volumeAgg,
+    totalGroups,
+    usersThisMonth,
+    usersPrevMonth,
+    txnsThisMonth,
+    txnsPrevMonth,
+    volumeThisMonthAgg,
+    volumePrevMonthAgg,
+    groupsThisMonth,
+    groupsPrevMonth,
+    newUsersToday,
+    txnsToday,
+    activeUsersToday,
+    recentTxns,
+    topGroupsRaw,
+  ] = await Promise.all([
+    prisma.user.count({ where: { role: "USER" } }),
+    prisma.transaction.count(),
+    prisma.transaction.aggregate({ _sum: { amount: true } }),
+    prisma.roommateGroup.count(),
+    prisma.user.count({ where: { role: "USER", createdAt: { gte: startOfMonth } } }),
+    prisma.user.count({
+      where: {
+        role: "USER",
+        createdAt: { gte: startOfPrevMonth, lt: startOfMonth },
+      },
+    }),
+    prisma.transaction.count({ where: { createdAt: { gte: startOfMonth } } }),
+    prisma.transaction.count({
+      where: { createdAt: { gte: startOfPrevMonth, lt: startOfMonth } },
+    }),
+    prisma.transaction.aggregate({
+      _sum: { amount: true },
+      where: { createdAt: { gte: startOfMonth } },
+    }),
+    prisma.transaction.aggregate({
+      _sum: { amount: true },
+      where: { createdAt: { gte: startOfPrevMonth, lt: startOfMonth } },
+    }),
+    prisma.roommateGroup.count({ where: { createdAt: { gte: startOfMonth } } }),
+    prisma.roommateGroup.count({
+      where: { createdAt: { gte: startOfPrevMonth, lt: startOfMonth } },
+    }),
+    prisma.user.count({
+      where: { role: "USER", createdAt: { gte: startOfDay } },
+    }),
+    prisma.transaction.count({ where: { createdAt: { gte: startOfDay } } }),
+    prisma.user.count({
+      where: { role: "USER", updatedAt: { gte: startOfDay } },
+    }),
+    prisma.transaction.findMany({
+      take: 5,
+      orderBy: { createdAt: "desc" },
+      include: {
+        user: { select: { fullName: true, email: true, phone: true } },
+      },
+    }),
+    prisma.roommateExpense.groupBy({
+      by: ["groupId"],
+      _sum: { amount: true },
+      orderBy: { _sum: { amount: "desc" } },
+      take: 3,
+    }),
+  ]);
+
+  const topGroupIds = topGroupsRaw.map((g) => g.groupId);
+  const topGroupsMeta = topGroupIds.length
+    ? await prisma.roommateGroup.findMany({
+        where: { id: { in: topGroupIds } },
+        include: { _count: { select: { members: true } } },
+      })
+    : [];
+  const topGroups = topGroupsRaw.map((g) => {
+    const meta = topGroupsMeta.find((m) => m.id === g.groupId);
+    return {
+      id: g.groupId,
+      name: meta?.name ?? "Group",
+      members: meta?._count.members ?? 0,
+      volume: g._sum.amount ?? 0,
+    };
+  });
+
+  function pctChange(curr: number, prev: number): number {
+    if (prev === 0) return curr > 0 ? 100 : 0;
+    return Math.round(((curr - prev) / prev) * 1000) / 10;
+  }
+
+  return {
+    totalUsers,
+    totalTransactions,
+    totalVolume: volumeAgg._sum.amount ?? 0,
+    totalGroups,
+    usersChange: pctChange(usersThisMonth, usersPrevMonth),
+    txnsChange: pctChange(txnsThisMonth, txnsPrevMonth),
+    volumeChange: pctChange(
+      volumeThisMonthAgg._sum.amount ?? 0,
+      volumePrevMonthAgg._sum.amount ?? 0
+    ),
+    groupsChange: pctChange(groupsThisMonth, groupsPrevMonth),
+    newUsersToday,
+    txnsToday,
+    activeUsersToday,
+    recentTxns,
+    topGroups,
+  };
+}
+
+export default async function AdminDashboardPage() {
+  const data = await getDashboardData();
   return (
     <div className="space-y-8">
       {/* Page header */}
@@ -25,32 +163,32 @@ export default function AdminDashboardPage() {
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
           label="Total Users"
-          value="1,248"
-          change={12.5}
+          value={data.totalUsers.toLocaleString()}
+          change={data.usersChange}
           changeLabel="vs last month"
           icon={Users}
           gradient="info"
         />
         <StatCard
           label="Total Transactions"
-          value="8,420"
-          change={8.2}
+          value={data.totalTransactions.toLocaleString()}
+          change={data.txnsChange}
           changeLabel="vs last month"
           icon={ArrowLeftRight}
           gradient="income"
         />
         <StatCard
           label="Total Volume"
-          value="ETB 2.4M"
-          change={-3.1}
+          value={formatETB(data.totalVolume)}
+          change={data.volumeChange}
           changeLabel="vs last month"
           icon={Wallet}
           gradient="warning"
         />
         <StatCard
           label="Active Groups"
-          value="86"
-          change={24}
+          value={data.totalGroups.toLocaleString()}
+          change={data.groupsChange}
           changeLabel="vs last month"
           icon={UsersRound}
           gradient="expense"
@@ -73,74 +211,54 @@ export default function AdminDashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {[
-                {
-                  user: "Abebe Kebede",
-                  action: "Added expense",
-                  amount: "- ETB 1,250",
-                  time: "2 min ago",
-                  type: "expense" as const,
-                },
-                {
-                  user: "Meron Tadesse",
-                  action: "Received income",
-                  amount: "+ ETB 5,000",
-                  time: "15 min ago",
-                  type: "income" as const,
-                },
-                {
-                  user: "Dawit Hailu",
-                  action: "Joined group",
-                  amount: "—",
-                  time: "1 hour ago",
-                  type: "neutral" as const,
-                },
-                {
-                  user: "Selam Bekele",
-                  action: "Added expense",
-                  amount: "- ETB 890",
-                  time: "2 hours ago",
-                  type: "expense" as const,
-                },
-                {
-                  user: "Yonas Alemu",
-                  action: "Received income",
-                  amount: "+ ETB 12,000",
-                  time: "3 hours ago",
-                  type: "income" as const,
-                },
-              ].map((item, i) => (
-                <div
-                  key={i}
-                  className="flex items-center justify-between py-2 border-b border-[var(--glass-border)] last:border-0"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="h-9 w-9 rounded-full bg-[var(--glass-bg)] flex items-center justify-center text-sm font-bold text-[var(--muted-foreground)]">
-                      {item.user.charAt(0)}
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-[var(--foreground)]">
-                        {item.user}
-                      </p>
-                      <p className="text-xs text-[var(--muted)]">{item.action}</p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p
-                      className={`text-sm font-semibold ${
-                        item.type === "income"
-                          ? "text-emerald-400"
-                          : item.type === "expense"
-                          ? "text-rose-400"
-                          : "text-[var(--muted)]"
-                      }`}
+              {data.recentTxns.length === 0 ? (
+                <p className="text-sm text-[var(--muted)] text-center py-8">
+                  No transactions yet.
+                </p>
+              ) : (
+                data.recentTxns.map((txn) => {
+                  const userName =
+                    txn.user.fullName ||
+                    txn.user.email ||
+                    txn.user.phone ||
+                    "Unknown";
+                  const isIncome = txn.type === "income";
+                  const sign = isIncome ? "+" : "-";
+                  return (
+                    <div
+                      key={txn.id}
+                      className="flex items-center justify-between py-2 border-b border-[var(--glass-border)] last:border-0"
                     >
-                      {item.amount}
-                    </p>
-                    <p className="text-xs text-[var(--muted)]">{item.time}</p>
-                  </div>
-                </div>
-              ))}
+                      <div className="flex items-center gap-3">
+                        <div className="h-9 w-9 rounded-full bg-[var(--glass-bg)] flex items-center justify-center text-sm font-bold text-[var(--muted-foreground)]">
+                          {userName.charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-[var(--foreground)]">
+                            {userName}
+                          </p>
+                          <p className="text-xs text-[var(--muted)]">
+                            {isIncome ? "Received income" : "Added expense"}
+                            {txn.categoryKey ? ` · ${txn.categoryKey}` : ""}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p
+                          className={`text-sm font-semibold ${
+                            isIncome ? "text-emerald-400" : "text-rose-400"
+                          }`}
+                        >
+                          {sign} {formatETB(txn.amount)}
+                        </p>
+                        <p className="text-xs text-[var(--muted)]">
+                          {timeAgo(txn.createdAt)}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
             </div>
           </CardContent>
         </Card>
@@ -156,9 +274,21 @@ export default function AdminDashboardPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               {[
-                { label: "New users today", value: "24", icon: Users },
-                { label: "Transactions today", value: "142", icon: CreditCard },
-                { label: "Active now", value: "38", icon: Activity },
+                {
+                  label: "New users today",
+                  value: data.newUsersToday.toLocaleString(),
+                  icon: Users,
+                },
+                {
+                  label: "Transactions today",
+                  value: data.txnsToday.toLocaleString(),
+                  icon: CreditCard,
+                },
+                {
+                  label: "Active today",
+                  value: data.activeUsersToday.toLocaleString(),
+                  icon: Activity,
+                },
               ].map((s) => (
                 <div
                   key={s.label}
@@ -181,24 +311,30 @@ export default function AdminDashboardPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              {[
-                { name: "Bole Apartment", members: 4, volume: "ETB 45K" },
-                { name: "Office Lunch", members: 8, volume: "ETB 12K" },
-                { name: "Trip Fund", members: 6, volume: "ETB 89K" },
-              ].map((g, i) => (
-                <div
-                  key={i}
-                  className="flex items-center justify-between rounded-xl bg-[var(--glass-bg)] px-4 py-3"
-                >
-                  <div>
-                    <p className="text-sm font-medium text-[var(--foreground)]">{g.name}</p>
-                    <p className="text-xs text-[var(--muted)]">{g.members} members</p>
+              {data.topGroups.length === 0 ? (
+                <p className="text-sm text-[var(--muted)] text-center py-4">
+                  No groups yet.
+                </p>
+              ) : (
+                data.topGroups.map((g) => (
+                  <div
+                    key={g.id}
+                    className="flex items-center justify-between rounded-xl bg-[var(--glass-bg)] px-4 py-3"
+                  >
+                    <div>
+                      <p className="text-sm font-medium text-[var(--foreground)]">
+                        {g.name}
+                      </p>
+                      <p className="text-xs text-[var(--muted)]">
+                        {g.members} members
+                      </p>
+                    </div>
+                    <span className="text-sm font-semibold text-emerald-400">
+                      {formatETB(g.volume)}
+                    </span>
                   </div>
-                  <span className="text-sm font-semibold text-emerald-400">
-                    {g.volume}
-                  </span>
-                </div>
-              ))}
+                ))
+              )}
             </CardContent>
           </Card>
         </div>
