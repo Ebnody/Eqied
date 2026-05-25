@@ -1,8 +1,9 @@
 "use client";
 
-import { Search, Bell, Menu } from "lucide-react";
+import { Search, Menu } from "lucide-react";
 import { useAdminSidebar } from "./sidebar-context";
 import { useState } from "react";
+import { NotificationBell } from "./notification-bell";
 
 export function AdminHeader() {
   const { toggleSidebar, toggleMobileSidebar } = useAdminSidebar();
@@ -44,12 +45,7 @@ export function AdminHeader() {
         </div>
 
         {/* Notifications */}
-        <button className="relative h-9 w-9 flex items-center justify-center rounded-lg border border-[var(--glass-border)] bg-[var(--glass-bg)] text-[var(--muted)] hover:text-[var(--foreground)] transition-colors">
-          <Bell className="h-4 w-4" />
-          <span className="absolute -right-0.5 -top-0.5 h-4 w-4 rounded-full bg-rose-500 text-[10px] font-bold text-white flex items-center justify-center">
-            3
-          </span>
-        </button>
+        <NotificationBell />
       </div>
     </header>
   );

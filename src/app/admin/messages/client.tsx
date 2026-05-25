@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   Loader2,
   Send,
@@ -79,12 +80,15 @@ function userLabel(u: IssueUser): string {
 }
 
 export function AdminMessagesClient() {
+  const searchParams = useSearchParams();
+  const initialId = searchParams.get("id");
+
   const [issues, setIssues] = useState<IssueListItem[]>([]);
   const [loadingList, setLoadingList] = useState(false);
   const [statusFilter, setStatusFilter] = useState("");
   const [search, setSearch] = useState("");
 
-  const [activeId, setActiveId] = useState<string | null>(null);
+  const [activeId, setActiveId] = useState<string | null>(initialId);
   const [activeIssue, setActiveIssue] = useState<IssueDetail | null>(null);
   const [loadingThread, setLoadingThread] = useState(false);
 

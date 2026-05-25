@@ -1,13 +1,9 @@
-feat(admin): support inbox at /admin/messages with thread view + reply (Phase 4)
+feat(admin): real notification bell with dropdown of recent events (Phase 5)
 
-- New API: GET /api/admin/issues (list with status/search filters)
-- New API: GET /api/admin/issues/unread-count (sidebar badge polling)
-- New API: GET/PATCH /api/admin/issues/[id] (fetch + status changes)
-- New API: POST /api/admin/issues/[id]/messages (admin reply, auto-promotes open->in_progress)
-- New page /admin/messages with split list/thread layout
-- Status filters (All / Open / In Progress / Resolved / Closed)
-- Search by subject
-- Per-message bubble UI with admin replies in green
-- Inline status change buttons in thread header
-- Sidebar nav now has Messages item with red unread badge polling every 30s
-- All admin replies and status changes logged to AdminLog
+- New API: GET /api/admin/notifications (combines unread tickets + recent signups + new groups)
+- New NotificationBell client component with dropdown panel
+- Polls every 30s; red badge shows unread ticket count (capped at 9+)
+- Click any notification -> navigates to relevant page
+- "View all messages" footer link to /admin/messages
+- Messages page now reads ?id= query param to auto-open a ticket from notification links
+- Replaces the static "3" demo badge in admin header
