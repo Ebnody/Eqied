@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -37,20 +37,26 @@ export default function AdminManagementPage() {
     role: "ADMIN" as "ADMIN" | "SUPER_ADMIN",
   });
 
-  useEffect(() => {
-    async function loadAdmins() {
-      try {
-        const res = await fetch("/api/admin/admins");
-        if (!res.ok) throw new Error("Failed to load admins");
-        const data = await res.json();
-        setAdmins(data.admins);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Error");
-      } finally {
-        setLoading(false);
-      }
+  const hasLoaded = useRef(false);
+
+  async function loadAdmins() {
+    try {
+      const res = await fetch("/api/admin/admins");
+      if (!res.ok) throw new Error("Failed to load admins");
+      const data = await res.json();
+      setAdmins(data.admins);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Error");
+    } finally {
+      setLoading(false);
     }
-    loadAdmins();
+  }
+
+  useEffect(() => {
+    if (!hasLoaded.current) {
+      hasLoaded.current = true;
+      loadAdmins();
+    }
   }, []);
 
   async function createAdmin(e: React.FormEvent) {

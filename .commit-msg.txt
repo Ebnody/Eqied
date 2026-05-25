@@ -1,0 +1,1 @@
+fix: merge admin middleware into proxy.ts and fix loadAdmins scope in admins page
