@@ -10,7 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Loader2, Plus, Users, Crown, Shield } from "lucide-react";
+import { Loader2, Plus, Users, Crown, Shield, Trash2 } from "lucide-react";
 
 type AdminUser = {
   id: string;
@@ -36,6 +36,9 @@ export default function AdminManagementPage() {
     phone: "",
     role: "ADMIN" as "ADMIN" | "SUPER_ADMIN",
   });
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
 
   const hasLoaded = useRef(false);
 
@@ -56,8 +59,33 @@ export default function AdminManagementPage() {
     if (!hasLoaded.current) {
       hasLoaded.current = true;
       loadAdmins();
+      // Load current user so we can hide delete on self
+      fetch("/api/auth/me")
+        .then((r) => r.ok ? r.json() : null)
+        .then((data) => {
+          if (data?.userId) setCurrentUserId(data.userId);
+        })
+        .catch(() => {});
     }
   }, []);
+
+  async function deleteAdmin(id: string) {
+    setDeletingId(id);
+    try {
+      const res = await fetch(`/api/admin/admins?id=${encodeURIComponent(id)}`, {
+        method: "DELETE",
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        alert(data.error || "Failed to delete");
+        return;
+      }
+      setConfirmDelete(null);
+      loadAdmins();
+    } finally {
+      setDeletingId(null);
+    }
+  }
 
   async function createAdmin(e: React.FormEvent) {
     e.preventDefault();
@@ -238,11 +266,64 @@ export default function AdminManagementPage() {
                     Admin
                   </span>
                 )}
+                {a.id !== currentUserId && (
+                  <button
+                    onClick={() => setConfirmDelete(a.id)}
+                    disabled={deletingId === a.id}
+                    className="text-rose-400 hover:text-rose-300 disabled:opacity-50"
+                    aria-label="Delete admin"
+                    title="Delete admin"
+                  >
+                    {deletingId === a.id ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Trash2 className="h-4 w-4" />
+                    )}
+                  </button>
+                )}
               </div>
             </div>
           ))}
         </div>
       </div>
+
+      {confirmDelete && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+          onClick={() => setConfirmDelete(null)}
+        >
+          <div
+            className="w-full max-w-md rounded-2xl border border-[var(--glass-border)] bg-[var(--glass-strong-bg)] backdrop-blur-xl p-6 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="text-lg font-semibold text-[var(--foreground)]">
+              Remove admin account?
+            </h3>
+            <p className="mt-2 text-sm text-[var(--muted)]">
+              This will permanently delete this administrator account. This cannot be undone.
+            </p>
+            <div className="mt-5 flex gap-3 justify-end">
+              <button
+                onClick={() => setConfirmDelete(null)}
+                disabled={!!deletingId}
+                className="rounded-xl border border-[var(--glass-border)] bg-[var(--glass-bg)] px-4 py-2 text-sm font-medium text-[var(--foreground)] hover:bg-[var(--glass-strong-bg)] transition-colors disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => deleteAdmin(confirmDelete)}
+                disabled={!!deletingId}
+                className="inline-flex items-center gap-2 rounded-xl bg-rose-600 px-4 py-2 text-sm font-medium text-white hover:bg-rose-500 transition-colors disabled:opacity-50"
+              >
+                {deletingId === confirmDelete && (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                )}
+                Delete admin
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -129,3 +129,36 @@ EthioBudget Team`,
     },
   });
 }
+
+// DELETE /api/admin/admins?id=<adminId> — remove an admin (super admin only, can't delete self)
+export async function DELETE(req: NextRequest) {
+  const superAdmin = await requireSuperAdmin();
+
+  const { searchParams } = new URL(req.url);
+  const id = searchParams.get("id");
+  if (!id) {
+    return NextResponse.json({ error: "Missing id" }, { status: 400 });
+  }
+
+  if (id === superAdmin.id) {
+    return NextResponse.json({ error: "You cannot delete yourself" }, { status: 400 });
+  }
+
+  const target = await prisma.user.findUnique({ where: { id } });
+  if (!target || (target.role !== "ADMIN" && target.role !== "SUPER_ADMIN")) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+
+  await prisma.user.delete({ where: { id } });
+
+  await logAdminAction({
+    adminId: superAdmin.id,
+    action: "DELETE_ADMIN",
+    resource: "User",
+    resourceId: id,
+    details: JSON.stringify({ fullName: target.fullName, email: target.email, role: target.role }),
+    req,
+  });
+
+  return NextResponse.json({ ok: true });
+}

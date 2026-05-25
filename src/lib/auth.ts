@@ -83,6 +83,12 @@ export async function getCurrentUser() {
     where: { id: userId },
     include: { telegramLink: true, settings: true },
   });
+  if (!user) return null;
+  // Suspended / disabled accounts are treated as logged-out
+  if (user.disabledAt) {
+    jar.delete(SESSION_COOKIE);
+    return null;
+  }
   return user;
 }
 
