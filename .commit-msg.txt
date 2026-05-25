@@ -1,1 +1,1 @@
-fix: merge admin middleware into proxy.ts and fix loadAdmins scope in admins page
+fix: roommate group sub-pages crashing on Vercel - replace broken server-side fetch with client-side load on mount

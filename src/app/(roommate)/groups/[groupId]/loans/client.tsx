@@ -46,6 +46,8 @@ export default function GroupLoansClient({
   }, [groupId]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    void refresh();
     const es = new EventSource(`/api/roommate/groups/${groupId}/events`);
     es.addEventListener("loan_updated", refresh);
     return () => es.close();

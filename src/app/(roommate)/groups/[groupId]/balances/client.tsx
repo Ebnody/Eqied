@@ -59,6 +59,8 @@ export default function GroupBalancesClient({
   }, [groupId]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    void refresh();
     const es = new EventSource(`/api/roommate/groups/${groupId}/events`);
     es.addEventListener("balances_changed", refresh);
     return () => es.close();

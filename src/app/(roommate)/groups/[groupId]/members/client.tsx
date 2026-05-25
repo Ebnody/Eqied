@@ -37,6 +37,8 @@ export default function GroupMembersClient({
   }, [groupId]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    void refresh();
     const es = new EventSource(`/api/roommate/groups/${groupId}/events`);
     es.addEventListener("member_changed", refresh);
     return () => es.close();
