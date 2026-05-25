@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth";
 import { logAdminAction } from "@/lib/admin-logger";
+import { sendTelegramMessage } from "@/lib/telegram/send";
 
 const replySchema = z.object({
   body: z.string().trim().min(1).max(5000),
@@ -37,7 +38,17 @@ export async function POST(
     return NextResponse.json({ error: "validation" }, { status: 400 });
   }
 
-  const issue = await prisma.issueReport.findUnique({ where: { id } });
+  const issue = await prisma.issueReport.findUnique({
+    where: { id },
+    include: {
+      user: {
+        select: {
+          fullName: true,
+          telegramLink: { select: { chatId: true } },
+        },
+      },
+    },
+  });
   if (!issue) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
@@ -80,6 +91,24 @@ export async function POST(
     }),
     req,
   });
+
+  // Best-effort Telegram DM to the user. Doesn't block the response.
+  const chatId = issue.user.telegramLink?.chatId;
+  if (chatId) {
+    const greeting = issue.user.fullName
+      ? `Hi ${issue.user.fullName.split(" ")[0]},`
+      : "Hi,";
+    const preview =
+      parsed.data.body.length > 400
+        ? parsed.data.body.slice(0, 400) + "..."
+        : parsed.data.body;
+    const text =
+      `${greeting}\n\n` +
+      `📩 Support reply on your ticket "${issue.subject}":\n\n` +
+      `${preview}\n\n` +
+      `Open the app to continue the conversation.`;
+    void sendTelegramMessage(chatId, text);
+  }
 
   return NextResponse.json({ ok: true, message, status: nextStatus });
 }

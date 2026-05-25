@@ -1,9 +1,7 @@
-feat(admin): real notification bell with dropdown of recent events (Phase 5)
+feat(support): Telegram DM delivery when admin replies to a ticket (Phase 6)
 
-- New API: GET /api/admin/notifications (combines unread tickets + recent signups + new groups)
-- New NotificationBell client component with dropdown panel
-- Polls every 30s; red badge shows unread ticket count (capped at 9+)
-- Click any notification -> navigates to relevant page
-- "View all messages" footer link to /admin/messages
-- Messages page now reads ?id= query param to auto-open a ticket from notification links
-- Replaces the static "3" demo badge in admin header
+- Admin reply route now looks up the user's TelegramLink and sends a DM via existing sendTelegramMessage helper
+- Fire-and-forget pattern (does not block API response)
+- Includes subject, first 400 chars of admin reply, and a prompt to open the app
+- Silent no-op when user has no Telegram linked
+- Failures logged but don't break the reply flow
