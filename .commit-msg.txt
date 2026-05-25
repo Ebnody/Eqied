@@ -1,11 +1,13 @@
-feat(support): floating help bubble for users to report issues + ticket thread API (Phase 3)
+feat(admin): support inbox at /admin/messages with thread view + reply (Phase 4)
 
-- New schema: IssueReport + IssueMessage models (subject, category, status, threaded messages)
-- New API: POST/GET /api/issues, GET /api/issues/[id], POST /api/issues/[id]/messages
-- New SupportBubble client component (bottom-right floating button on user pages)
-  - Lists user's tickets with unread badge and status icons
-  - New ticket form (subject, category, body)
-  - Thread view with reply box (closed tickets are read-only)
-  - Polls /api/issues every 60s for unread admin replies
-- Mounted on (dashboard) and (roommate) layouts
-- User reopen behavior: replying to a resolved ticket reopens it
+- New API: GET /api/admin/issues (list with status/search filters)
+- New API: GET /api/admin/issues/unread-count (sidebar badge polling)
+- New API: GET/PATCH /api/admin/issues/[id] (fetch + status changes)
+- New API: POST /api/admin/issues/[id]/messages (admin reply, auto-promotes open->in_progress)
+- New page /admin/messages with split list/thread layout
+- Status filters (All / Open / In Progress / Resolved / Closed)
+- Search by subject
+- Per-message bubble UI with admin replies in green
+- Inline status change buttons in thread header
+- Sidebar nav now has Messages item with red unread badge polling every 30s
+- All admin replies and status changes logged to AdminLog

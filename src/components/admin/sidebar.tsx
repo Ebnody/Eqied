@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
@@ -14,11 +15,19 @@ import {
   Shield,
   ScrollText,
   LogOut,
+  MessageSquare,
 } from "lucide-react";
 import { useAdminSidebar } from "./sidebar-context";
 
-function getNavSections(role: string) {
-  const sections = [
+interface NavItemConfig {
+  title: string;
+  href: string;
+  icon: React.ComponentType<{ className?: string }>;
+  badgeKey?: "messages";
+}
+
+function getNavSections(role: string): { label: string; items: NavItemConfig[] }[] {
+  const sections: { label: string; items: NavItemConfig[] }[] = [
     {
       label: "MAIN MENU",
       items: [
@@ -26,6 +35,7 @@ function getNavSections(role: string) {
         { title: "Users", href: "/admin/users", icon: Users },
         { title: "Transactions", href: "/admin/transactions", icon: ArrowLeftRight },
         { title: "Groups", href: "/admin/groups", icon: UsersRound },
+        { title: "Messages", href: "/admin/messages", icon: MessageSquare, badgeKey: "messages" },
       ],
     },
   ];
@@ -56,11 +66,13 @@ function NavItem({
   icon: Icon,
   title,
   isActive,
+  badge,
 }: {
   href: string;
   icon: React.ComponentType<{ className?: string }>;
   title: string;
   isActive: boolean;
+  badge?: number;
 }) {
   return (
     <Link
@@ -73,7 +85,12 @@ function NavItem({
       )}
     >
       <Icon className="h-5 w-5 shrink-0" />
-      <span>{title}</span>
+      <span className="flex-1">{title}</span>
+      {typeof badge === "number" && badge > 0 && (
+        <span className="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-rose-500 text-white text-[11px] font-bold">
+          {badge > 99 ? "99+" : badge}
+        </span>
+      )}
     </Link>
   );
 }
@@ -90,6 +107,34 @@ export function AdminSidebar({ admin }: AdminSidebarProps) {
   const pathname = usePathname();
   const { isOpen, isMobileOpen, setIsMobileOpen } = useAdminSidebar();
   const navSections = getNavSections(admin?.role ?? "ADMIN");
+  const [unreadMessages, setUnreadMessages] = useState(0);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function tick() {
+      try {
+        const res = await fetch("/api/admin/issues/unread-count", {
+          cache: "no-store",
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!cancelled) setUnreadMessages(data.count ?? 0);
+      } catch {
+        // ignore
+      }
+    }
+    tick();
+    const interval = setInterval(tick, 30_000);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
+  }, []);
+
+  function badgeFor(key?: string): number | undefined {
+    if (key === "messages") return unreadMessages;
+    return undefined;
+  }
 
   return (
     <>
@@ -144,6 +189,7 @@ export function AdminSidebar({ admin }: AdminSidebarProps) {
                         icon={item.icon}
                         title={item.title}
                         isActive={pathname === item.href || pathname.startsWith(item.href + "/")}
+                        badge={badgeFor(item.badgeKey)}
                       />
                     </li>
                   ))}
