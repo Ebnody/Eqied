@@ -1,1 +1,1 @@
-feat: replace mock data on admin dashboard with real-time database stats from Prisma
+feat: replace mock data with real Prisma queries on admin users, transactions, and groups pages

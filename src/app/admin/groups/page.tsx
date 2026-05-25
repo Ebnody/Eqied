@@ -1,65 +1,46 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Search, UsersRound, MoreHorizontal } from "lucide-react";
+import { prisma } from "@/lib/prisma";
 
-const GROUPS = [
-  {
-    id: "1",
-    name: "Bole Apartment",
-    members: 4,
-    expenses: 32,
-    totalVolume: 45000,
-    created: "Jan 10, 2026",
-    owner: "Abebe Kebede",
-    status: "active",
-  },
-  {
-    id: "2",
-    name: "Office Lunch",
-    members: 8,
-    expenses: 124,
-    totalVolume: 12800,
-    created: "Feb 15, 2026",
-    owner: "Meron Tadesse",
-    status: "active",
-  },
-  {
-    id: "3",
-    name: "Trip Fund",
-    members: 6,
-    expenses: 18,
-    totalVolume: 89000,
-    created: "Mar 01, 2026",
-    owner: "Dawit Hailu",
-    status: "active",
-  },
-  {
-    id: "4",
-    name: "Project Alpha",
-    members: 3,
-    expenses: 45,
-    totalVolume: 32000,
-    created: "Apr 20, 2026",
-    owner: "Selam Bekele",
-    status: "archived",
-  },
-  {
-    id: "5",
-    name: "Gym Buddies",
-    members: 5,
-    expenses: 67,
-    totalVolume: 15400,
-    created: "May 05, 2026",
-    owner: "Yonas Alemu",
-    status: "active",
-  },
-];
+export const dynamic = "force-dynamic";
 
-function formatETB(amount: number) {
-  return `ETB ${amount.toLocaleString("en-ET")}`;
+function formatETB(santim: number) {
+  return `ETB ${(santim / 100).toLocaleString("en-US", { maximumFractionDigits: 0 })}`;
 }
 
-export default function AdminGroupsPage() {
+async function getGroups() {
+  const rows = await prisma.roommateGroup.findMany({
+    orderBy: { createdAt: "desc" },
+    take: 100,
+    include: {
+      createdBy: { select: { fullName: true, email: true, phone: true } },
+      _count: { select: { members: true, expenses: true } },
+      expenses: { select: { amount: true } },
+    },
+  });
+  return rows.map((g) => ({
+    id: g.id,
+    name: g.name,
+    members: g._count.members,
+    expenses: g._count.expenses,
+    totalVolume: g.expenses.reduce((sum, e) => sum + e.amount, 0),
+    created: g.createdAt.toLocaleDateString("en-US", {
+      month: "short",
+      day: "2-digit",
+      year: "numeric",
+    }),
+    owner:
+      g.createdBy.fullName ||
+      g.createdBy.email ||
+      g.createdBy.phone ||
+      "Unknown",
+    status: "active",
+  }));
+}
+
+export default async function AdminGroupsPage() {
+  const GROUPS = await getGroups();
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -113,6 +94,13 @@ export default function AdminGroupsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--glass-border)]">
+                {GROUPS.length === 0 && (
+                  <tr>
+                    <td colSpan={8} className="px-6 py-12 text-center text-sm text-[var(--muted)]">
+                      No groups yet.
+                    </td>
+                  </tr>
+                )}
                 {GROUPS.map((g) => (
                   <tr
                     key={g.id}

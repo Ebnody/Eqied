@@ -1,65 +1,42 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Search, Filter, MoreHorizontal, Mail, Phone } from "lucide-react";
+import { prisma } from "@/lib/prisma";
 
-const USERS = [
-  {
-    id: "1",
-    name: "Abebe Kebede",
-    email: "abebe@example.com",
-    phone: "+251911234567",
-    status: "active",
-    joined: "Jan 15, 2026",
-    transactions: 142,
-  },
-  {
-    id: "2",
-    name: "Meron Tadesse",
-    email: "meron@example.com",
-    phone: "+251922345678",
-    status: "active",
-    joined: "Feb 03, 2026",
-    transactions: 89,
-  },
-  {
-    id: "3",
-    name: "Dawit Hailu",
-    email: "dawit@example.com",
-    phone: "+251933456789",
-    status: "inactive",
-    joined: "Mar 12, 2026",
-    transactions: 34,
-  },
-  {
-    id: "4",
-    name: "Selam Bekele",
-    email: "selam@example.com",
-    phone: "+251944567890",
-    status: "active",
-    joined: "Apr 01, 2026",
-    transactions: 215,
-  },
-  {
-    id: "5",
-    name: "Yonas Alemu",
-    email: "yonas@example.com",
-    phone: "+251955678901",
-    status: "pending",
-    joined: "May 10, 2026",
-    transactions: 12,
-  },
-  {
-    id: "6",
-    name: "Hiwot Girma",
-    email: "hiwot@example.com",
-    phone: "+251966789012",
-    status: "active",
-    joined: "May 18, 2026",
-    transactions: 56,
-  },
-];
+export const dynamic = "force-dynamic";
 
-export default function AdminUsersPage() {
+async function getUsers() {
+  const rows = await prisma.user.findMany({
+    where: { role: "USER" },
+    orderBy: { createdAt: "desc" },
+    take: 100,
+    select: {
+      id: true,
+      fullName: true,
+      email: true,
+      phone: true,
+      isVerified: true,
+      createdAt: true,
+      _count: { select: { transactions: true } },
+    },
+  });
+  return rows.map((u) => ({
+    id: u.id,
+    name: u.fullName || u.email || u.phone || "Unnamed",
+    email: u.email || "—",
+    phone: u.phone || "—",
+    status: u.isVerified ? "active" : "pending",
+    joined: u.createdAt.toLocaleDateString("en-US", {
+      month: "short",
+      day: "2-digit",
+      year: "numeric",
+    }),
+    transactions: u._count.transactions,
+  }));
+}
+
+export default async function AdminUsersPage() {
+  const USERS = await getUsers();
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -116,6 +93,13 @@ export default function AdminUsersPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--glass-border)]">
+                {USERS.length === 0 && (
+                  <tr>
+                    <td colSpan={6} className="px-6 py-12 text-center text-sm text-[var(--muted)]">
+                      No users yet.
+                    </td>
+                  </tr>
+                )}
                 {USERS.map((user) => (
                   <tr
                     key={user.id}

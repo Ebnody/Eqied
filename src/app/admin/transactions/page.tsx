@@ -1,75 +1,40 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Search, Filter, ArrowUpRight, ArrowDownRight } from "lucide-react";
+import { prisma } from "@/lib/prisma";
 
-const TRANSACTIONS = [
-  {
-    id: "TX-4821",
-    user: "Abebe Kebede",
-    type: "expense",
-    category: "Food & Dining",
-    amount: 1250,
-    method: "telebirr",
-    date: "May 22, 2026",
-    status: "completed",
-  },
-  {
-    id: "TX-4820",
-    user: "Meron Tadesse",
-    type: "income",
-    category: "Salary",
-    amount: 15000,
-    method: "Bank Transfer",
-    date: "May 22, 2026",
-    status: "completed",
-  },
-  {
-    id: "TX-4819",
-    user: "Dawit Hailu",
-    type: "expense",
-    category: "Transport",
-    amount: 450,
-    method: "telebirr",
-    date: "May 21, 2026",
-    status: "completed",
-  },
-  {
-    id: "TX-4818",
-    user: "Selam Bekele",
-    type: "expense",
-    category: "Shopping",
-    amount: 3200,
-    method: "Cash",
-    date: "May 21, 2026",
-    status: "pending",
-  },
-  {
-    id: "TX-4817",
-    user: "Yonas Alemu",
-    type: "income",
-    category: "Freelance",
-    amount: 8500,
-    method: "Bank Transfer",
-    date: "May 20, 2026",
-    status: "completed",
-  },
-  {
-    id: "TX-4816",
-    user: "Hiwot Girma",
-    type: "expense",
-    category: "Utilities",
-    amount: 1800,
-    method: "telebirr",
-    date: "May 20, 2026",
-    status: "failed",
-  },
-];
+export const dynamic = "force-dynamic";
 
-function formatETB(amount: number) {
-  return `ETB ${amount.toLocaleString("en-ET")}`;
+function formatETB(santim: number) {
+  return `ETB ${(santim / 100).toLocaleString("en-US", { maximumFractionDigits: 0 })}`;
 }
 
-export default function AdminTransactionsPage() {
+async function getTransactions() {
+  const rows = await prisma.transaction.findMany({
+    orderBy: { occurredAt: "desc" },
+    take: 100,
+    include: {
+      user: { select: { fullName: true, email: true, phone: true } },
+    },
+  });
+  return rows.map((t) => ({
+    id: t.id,
+    user: t.user.fullName || t.user.email || t.user.phone || "Unknown",
+    type: t.type,
+    category: t.categoryKey || "—",
+    amount: t.amount,
+    method: t.paymentMethod || t.source,
+    date: t.occurredAt.toLocaleDateString("en-US", {
+      month: "short",
+      day: "2-digit",
+      year: "numeric",
+    }),
+    status: t.status,
+  }));
+}
+
+export default async function AdminTransactionsPage() {
+  const TRANSACTIONS = await getTransactions();
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -129,13 +94,20 @@ export default function AdminTransactionsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--glass-border)]">
+                {TRANSACTIONS.length === 0 && (
+                  <tr>
+                    <td colSpan={8} className="px-6 py-12 text-center text-sm text-[var(--muted)]">
+                      No transactions yet.
+                    </td>
+                  </tr>
+                )}
                 {TRANSACTIONS.map((tx) => (
                   <tr
                     key={tx.id}
                     className="transition-colors hover:bg-[var(--glass-bg)]"
                   >
                     <td className="px-6 py-4 text-sm font-mono text-[var(--muted-foreground)]">
-                      {tx.id}
+                      {tx.id.slice(0, 10)}
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
@@ -177,9 +149,9 @@ export default function AdminTransactionsPage() {
                       <Badge
                         variant="outline"
                         className={
-                          tx.status === "completed"
+                          tx.status === "categorized"
                             ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-400"
-                            : tx.status === "pending"
+                            : tx.status === "uncategorized"
                             ? "border-amber-500/20 bg-amber-500/10 text-amber-400"
                             : "border-rose-500/20 bg-rose-500/10 text-rose-400"
                         }
