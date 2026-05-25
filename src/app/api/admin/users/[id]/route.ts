@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin, requireSuperAdmin } from "@/lib/auth";
 import { logAdminAction } from "@/lib/admin-logger";
+import { sendTelegramMessage } from "@/lib/telegram/send";
 
 // PATCH /api/admin/users/[id] — suspend/unsuspend a user (any admin)
 const patchSchema = z.object({
@@ -29,7 +30,10 @@ export async function PATCH(
     return NextResponse.json({ error: "validation" }, { status: 400 });
   }
 
-  const target = await prisma.user.findUnique({ where: { id } });
+  const target = await prisma.user.findUnique({
+    where: { id },
+    include: { telegramLink: true },
+  });
   if (!target) {
     return NextResponse.json({ error: "User not found" }, { status: 404 });
   }
@@ -72,6 +76,19 @@ export async function PATCH(
     }),
     req,
   });
+
+  // Notify user via Telegram if they have a linked account
+  if (isSuspending && target.telegramLink) {
+    const reasonText = parsed.data.reason
+      ? `\n\nReason: ${parsed.data.reason}`
+      : "";
+    sendTelegramMessage(
+      target.telegramLink.chatId,
+      `⚠️ Your EthioBudget account has been suspended by an administrator.${reasonText}\n\nIf you believe this is a mistake, please contact support through this bot.`
+    ).catch(() => {
+      // Non-blocking: log failure silently
+    });
+  }
 
   return NextResponse.json({
     ok: true,

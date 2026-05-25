@@ -87,6 +87,12 @@ export async function getCurrentUser() {
   // Suspended / disabled accounts are treated as logged-out
   if (user.disabledAt) {
     jar.delete(SESSION_COOKIE);
+    // Set a short-lived cookie so the client knows to redirect to /suspended
+    jar.set("suspended_account", "1", {
+      httpOnly: false,
+      path: "/",
+      maxAge: 300, // 5 minutes
+    });
     return null;
   }
   return user;

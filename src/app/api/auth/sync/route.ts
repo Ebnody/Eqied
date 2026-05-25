@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { verifySessionToken, setSessionCookie } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 
 const schema = z.object({
   token: z.string().min(10),
@@ -18,6 +19,17 @@ export async function POST(req: NextRequest) {
   const userId = await verifySessionToken(parsed.data.token);
   if (!userId) {
     return NextResponse.json({ error: "invalid_token" }, { status: 401 });
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { disabledAt: true },
+  });
+  if (user?.disabledAt) {
+    return NextResponse.json(
+      { error: "Account suspended", code: "account_suspended" },
+      { status: 403 }
+    );
   }
 
   await setSessionCookie(parsed.data.token);

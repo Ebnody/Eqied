@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,11 @@ import {
 import { Loader2 } from "lucide-react";
 import { useI18n } from "@/i18n/provider";
 
+function hasSuspendedCookie() {
+  if (typeof document === "undefined") return false;
+  return document.cookie.split("; ").some((c) => c.startsWith("suspended_account="));
+}
+
 export default function LoginPage() {
   const router = useRouter();
   const params = useSearchParams();
@@ -26,6 +31,13 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Redirect if user arrived here because their session was suspended
+  useEffect(() => {
+    if (hasSuspendedCookie()) {
+      router.push("/suspended");
+    }
+  }, [router]);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -39,6 +51,10 @@ export default function LoginPage() {
       });
       const data = await res.json();
       if (!res.ok) {
+        if (data.code === "account_suspended") {
+          router.push("/suspended");
+          return;
+        }
         if (data.code === "not_verified" && data.userId) {
           const params = new URLSearchParams({ userId: data.userId });
           if (data.botUsername) params.set("bot", data.botUsername);
