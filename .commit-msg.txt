@@ -1,1 +1,1 @@
-feat: replace mock data with real Prisma queries on admin users, transactions, and groups pages
+feat(admin): make dashboard stat cards clickable and wire View All button to transactions page (Phase 1)

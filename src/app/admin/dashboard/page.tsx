@@ -10,6 +10,7 @@ import {
   UsersRound,
 } from "lucide-react";
 import { prisma } from "@/lib/prisma";
+import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
@@ -168,6 +169,7 @@ export default async function AdminDashboardPage() {
           changeLabel="vs last month"
           icon={Users}
           gradient="info"
+          href="/admin/users"
         />
         <StatCard
           label="Total Transactions"
@@ -176,6 +178,7 @@ export default async function AdminDashboardPage() {
           changeLabel="vs last month"
           icon={ArrowLeftRight}
           gradient="income"
+          href="/admin/transactions"
         />
         <StatCard
           label="Total Volume"
@@ -184,6 +187,7 @@ export default async function AdminDashboardPage() {
           changeLabel="vs last month"
           icon={Wallet}
           gradient="warning"
+          href="/admin/transactions"
         />
         <StatCard
           label="Active Groups"
@@ -192,6 +196,7 @@ export default async function AdminDashboardPage() {
           changeLabel="vs last month"
           icon={UsersRound}
           gradient="expense"
+          href="/admin/groups"
         />
       </div>
 
@@ -204,9 +209,12 @@ export default async function AdminDashboardPage() {
               <CardTitle className="text-base font-semibold text-[var(--foreground)]">
                 Recent Transactions
               </CardTitle>
-              <button className="text-xs font-medium text-emerald-400 hover:text-emerald-300 transition-colors">
+              <Link
+                href="/admin/transactions"
+                className="text-xs font-medium text-emerald-400 hover:text-emerald-300 transition-colors"
+              >
                 View All
-              </button>
+              </Link>
             </div>
           </CardHeader>
           <CardContent>

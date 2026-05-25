@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { ArrowUpRight, ArrowDownRight } from "lucide-react";
 
@@ -8,6 +9,7 @@ interface StatCardProps {
   changeLabel?: string;
   icon: React.ComponentType<{ className?: string }>;
   gradient?: "income" | "expense" | "warning" | "info";
+  href?: string;
 }
 
 const GRADIENTS = {
@@ -24,12 +26,12 @@ export function StatCard({
   changeLabel,
   icon: Icon,
   gradient = "info",
+  href,
 }: StatCardProps) {
   const isPositive = change && change >= 0;
 
-  return (
-    <div className="glass rounded-2xl p-6 transition-all hover:bg-[var(--glass-strong-bg)]">
-      <div className="flex items-start justify-between">
+  const content = (
+    <div className="flex items-start justify-between">
         <div className="space-y-4">
           <p className="text-sm font-medium text-[var(--muted)]">{label}</p>
           <p className="text-2xl font-bold text-[var(--foreground)]">{value}</p>
@@ -65,6 +67,19 @@ export function StatCard({
           <Icon className="h-5 w-5 text-white" />
         </div>
       </div>
-    </div>
   );
+
+  const className =
+    "glass rounded-2xl p-6 transition-all hover:bg-[var(--glass-strong-bg)]" +
+    (href ? " block hover:scale-[1.02] cursor-pointer" : "");
+
+  if (href) {
+    return (
+      <Link href={href} className={className}>
+        {content}
+      </Link>
+    );
+  }
+
+  return <div className={className}>{content}</div>;
 }
